@@ -15,7 +15,6 @@ cp ../Alex_Functions/*.dat ./
 cp ../Alex_Functions/*.sh ./
 cp ../batch_whole_pipeline.sh ./
 cp ../batch_whole_pipeline2.sh ./
-cp ../batch_whole_pipeline3.sh ./
 
 cp ../rescaling_code/ -r ./
 
