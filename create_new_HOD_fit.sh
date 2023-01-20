@@ -13,8 +13,8 @@ cp ../Alex_Functions/*.py ./
 cp ../Alex_Functions/*.csv ./
 cp ../Alex_Functions/*.dat ./
 cp ../Alex_Functions/*.sh ./
-cp ../batch_whole_pipeline.sh ./
-cp ../batch_whole_pipeline2.sh ./
+cp ../batch_hod_fitting.sh ./
+cp ../batch_hod_fitting2.sh ./
 
 cp ../rescaling_code/ -r ./
 
@@ -44,6 +44,5 @@ cp cosmology_rescaling_factor_xi_zel_8.txt FastHodFitting/fitting_smoothed_curve
 cp target_num_den_rescaled.txt FastHodFitting/fitting_smoothed_curves_nersc/target_num_den_rescaled.txt
 #cp -r ../FastHodFitting/ ./
 
-jid1=$(sbatch --parsable batch_whole_pipeline.sh)
-jid2=$(sbatch  --dependency=afterany:$jid1 --parsable batch_whole_pipeline2.sh)
-#jid2=$(sbatch  --dependency=afterany:$jid2 --parsable batch_whole_pipeline3.sh)
+jid1=$(sbatch --parsable batch_hod_fitting.sh)
+jid2=$(sbatch  --dependency=afterany:$jid1 --parsable batch_hod_fitting2.sh)

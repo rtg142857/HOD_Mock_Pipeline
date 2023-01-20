@@ -1,7 +1,7 @@
 #!/bin/bash -l
 # Script to create a mock after HOD fits have been made
 # Change these to use a different cosmology/phase number
-cosmo_number=0
+cosmo_number=180
 phase_number=0
 
 # Only make a mock if the corresponding HOD fit directory is present
