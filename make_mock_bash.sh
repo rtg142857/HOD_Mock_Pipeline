@@ -2,7 +2,7 @@
 # Script to create a mock after HOD fits have been made
 # Change these to use a different cosmology/phase number
 cosmo_number=0
-phase_number=1
+phase_number=0
 
 # Only make a mock if the corresponding HOD fit directory is present
 if ! [ -d "halo_fitting_${cosmo_number}_${phase_number}/shared_code/abacus_mocks/" ]
