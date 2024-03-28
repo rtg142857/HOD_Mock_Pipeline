@@ -30,7 +30,8 @@ sed -i "s/ph = 0/ph = ${phase_number}/" tracer_snapshot_unresolved.py
 
 sed -i "s/cosmo = 0/cosmo = ${cosmo_number}/" tracer_snapshot_unresolved.py
 
-conda activate halo_env
+#conda activate halo_env
+source /global/common/software/desi/users/adematti/cosmodesi_environment.sh main
 
 python rescaling_code/xi_rescaling_factor.py
 
@@ -40,7 +41,7 @@ git clone "https://github.com/cejgrove/FastHodFitting"
 
 git clone "https://github.com/amjsmith/shared_code/"
 
-cp cosmology_rescaling_factor_xi_zel_8.txt FastHodFitting/fitting_smoothed_curves_nersc/cosmology_rescaling_factor_xi_zel_8.txt
+cp cosmology_rescaling_factor_xi_lin_8.txt FastHodFitting/fitting_smoothed_curves_nersc/cosmology_rescaling_factor_xi_lin_8.txt
 cp target_num_den_rescaled.txt FastHodFitting/fitting_smoothed_curves_nersc/target_num_den_rescaled.txt
 #cp -r ../FastHodFitting/ ./
 
