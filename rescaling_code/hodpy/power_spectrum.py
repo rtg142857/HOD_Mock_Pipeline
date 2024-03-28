@@ -3,7 +3,7 @@ import numpy as np
 from scipy.integrate import simps, quad
 from scipy.interpolate import splrep, splev
 from scipy.optimize import minimize
-from nbodykit.lab import cosmology as nbodykit_cosmology
+from cosmoprimo import Fourier
 
 from hodpy.cosmology import Cosmology
 
@@ -12,17 +12,22 @@ class PowerSpectrum(object):
     Class containing the linear power spectrum and useful methods
 
     Args:
-        filename: Tabulated file of linear P(k) at z=0
-        h0:       Hubble parameter at z=0, in units [100 km/s/Mpc]
-        OmegaM:   Omega matter at z=0
+        cosmo: instance of Cosmology class
     """
     def __init__(self, cosmo):
         
         self.cosmo = cosmo   # this is my cosmology class
-        self.__p_lin = nbodykit_cosmology.LinearPower(cosmo.cosmo_nbodykit,
-                                                redshift=0, transfer="CLASS")
         
-        self.__k = 10**np.arange(-6,6,0.01)
+        # linear power spectrum
+        fo_lin = Fourier(self.cosmo.cosmo_cosmoprimo, engine='class', non_linear=False)
+        self.__p_lin = fo_lin.pk_interpolator()
+        
+        # non-linear power spectrum
+        fo_nl = Fourier(self.cosmo.cosmo_cosmoprimo, engine='class', non_linear=True)
+        self.__p_nl = fo_nl.pk_interpolator()
+        
+        # arrays needed to compute integral to get sigma(M)
+        self.__k = 10**np.arange(-6,2,0.01)
         self.__P = self.P_lin(self.__k, z=0)
         self.__tck = self.__get_sigma_spline() #spline fit to sigma(M,z=0)
 
@@ -37,8 +42,21 @@ class PowerSpectrum(object):
         Returns:
             array of linear power spectrum in units [Mpc/h]^-3
         """
-        return self.__p_lin(k) * self.cosmo.growth_factor(z)**2
+        return self.__p_lin(k, z=0) * self.cosmo.growth_factor(z)**2
 
+    
+    def P_nl(self, k, z):
+        """
+        Returns the non-linear power spectrum at redshift z
+
+        Args:
+            k: array of k in units [h/Mpc]
+            z: array of z
+        Returns:
+            array of linear power spectrum in units [Mpc/h]^-3
+        """
+        return self.__p_nl(k, z=0) * self.cosmo.growth_factor(z)**2
+    
     
     def Delta2_lin(self, k, z):
         """
@@ -191,69 +209,58 @@ class PowerSpectrum(object):
         return 1.686 / self.cosmo.growth_factor(z)
 
     
-    def get_xi(self, r_bins, scale=8, power_spectrum="zel", z=0.2):
+    
+    def get_xi(self, r, z, power_spectrum="lin"):
         """
         Returns the correlation function xi(r)
     
         Args:
-            cosmo: nbodykit cosmology class
-            r_bins: array of bins in r to calculate xi(r)
-            scale: scale for normalisation (default 8 Mpc/h)
-            power_spectrum: can be "lin", "nl" or "zel" (default is "zel")
-            z: redshift
-
+            r:                array of separation r, in units Mpc/h
+            z:                redshift to calculate xi
+            [power_spectrum]: can be "lin", "nl" or "zel" (default is "lin")
         Returns:
-            xi at the normalisation scale
-            array of xi evaluated in r_bins
+            array of xi evaluated at r values
         """
-
-        # get power spectra at z=0, then evolve xi to the right redshift after
         
         if power_spectrum=="lin":
             # linear power spectrum
-            Pk = nbodykit_cosmology.LinearPower(self.cosmo.cosmo_nbodykit,
-                                        redshift=0, transfer='CLASS')
+            xi = self.__p_lin.to_xi()
+            
         elif power_spectrum=="nl":
             # non-linear power spectrum
-            Pk = nbodykit_cosmology.HalofitPower(self.cosmo.cosmo_nbodykit,
-                                                 redshift=0)
+            xi = self.__p_nl.to_xi()
+            
         elif power_spectrum=="zel":
-            # Zel'dovich power spectrum 
-            Pk = nbodykit_cosmology.ZeldovichPower(self.cosmo.cosmo_nbodykit,
-                                                   redshift=0)
+            # zeldovich power spectrum
+            # doesn't seem to be implemented in cosmoprimo
+            raise NotImplementedError("Zeldovich power spectrum not implemented")
+            
         else:
             raise ValueError("Invalid power spectrum", power_spectrum)
-    
-        xi = nbodykit_cosmology.CorrelationFunction(Pk)
 
-        xi_scale = xi(scale)*self.cosmo.growth_factor(z)**2
-        xi_bins = xi(r_bins)*self.cosmo.growth_factor(z)**2
-        
-        return xi_scale, xi_bins
+        xi = xi(r, z)
+        return xi
 
     
-    def get_wp(self, rp_bins, pimax=120, scale=8, power_spectrum="zel", z=0.2):
+    def get_wp(self, rp, z, pimax=120, power_spectrum="lin"):
         """
         Returns the projected correlation function wp(rp)
     
         Args:
-            cosmo: nbodykit cosmology class
-            rp_bins: array of bins in rp to calculate wp(rp)
-            pimax: maximum value of pi in integral
-            scale: scale for normalisation (default 8 Mpc/h)
-            power_spectrum: can be "lin", "nl" or "zel" (default is "zel")
-            z: redshift
-
+            r:                array of separation r, in units Mpc/h
+            z:                redshift to calculate xi
+            [pi_max]:         maximum value of pi in integral, in Mpc/h, default is 120
+            [power_spectrum]: can be "lin", "nl" or "zel" (default is "lin")
         Returns:
-            wp at the normalisation scale
-            array of wp evaluated in rp_bins
+            array of wp evaluated at rp values
         """
         pi_bins = np.arange(0,pimax+0.01,0.1)
-        rp_grid, pi_grid = np.meshgrid(np.append(rp_bins,scale), pi_bins)
+        rp_grid, pi_grid = np.meshgrid(rp, pi_bins)
         r_bins = (rp_grid**2 + pi_grid**2)**0.5
     
-        xi0, xi = self.get_xi(r_bins=r_bins, scale=scale,
-                              power_spectrum=power_spectrum, z=z)
+        # this is just in real space, and doesn't include the effect of RSD
+        xi = self.get_xi(r=r_bins, z=z, power_spectrum=power_spectrum)
         wp = np.sum(xi,axis=0)
     
-        return wp[-1], wp[:-1]
+        return wp
+        

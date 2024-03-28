@@ -4,7 +4,7 @@ from hodpy.cosmology import CosmologyMXXL, CosmologyAbacus
 
 
 def rescale_cosmology_abacus(cosmo, output_file=None, correlation_function="xi",
-                             pimax=120, scale=8, power_spectrum="zel", z=0.2):
+                             pimax=120, scale=8, power_spectrum="lin", z=0.2):
     """
         Returns the cosmology rescaling factors for the correlation
         function, for rescaling the MXXL cosmology to AbacusSummit
@@ -46,7 +46,7 @@ if __name__ == "__main__":
     scale = 8 #Mpc/h, scale where scaling factor normalised to be 1 (and set to 1 below this)
     z=0.2
 
-    power_spectrum = "zel"
+    power_spectrum = "lin"
     
     output_file = "cosmology_rescaling_factor_%s_%s_%i.txt"%(correlation_function, power_spectrum, scale)
     
