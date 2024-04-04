@@ -5,7 +5,7 @@ from scipy.interpolate import splrep, splev
 from scipy.optimize import minimize
 from cosmoprimo import Fourier
 
-from hodpy.cosmology import Cosmology
+from cosmology import Cosmology
 
 class PowerSpectrum(object):
     """
