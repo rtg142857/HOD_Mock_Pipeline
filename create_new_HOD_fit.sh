@@ -37,7 +37,7 @@ python rescaling_code/xi_rescaling_factor.py
 
 python rescaling_code/luminosity_function.py
 
-git clone "https://github.com/cejgrove/FastHodFitting"
+git clone "https://github.com/amjsmith/FastHodFitting"
 
 git clone "https://github.com/amjsmith/shared_code/"
 

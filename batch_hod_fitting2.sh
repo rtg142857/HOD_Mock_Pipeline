@@ -8,19 +8,16 @@
 #SBATCH --tasks-per-node=1
 #SBATCH -C cpu
 
-conda activate halo_env
+#conda activate halo_env
+#source activate abacus-p
+cosmodesienv main
 
 module load gcc
 module load gsl
 module unload craype-hugepages2M
 
-cd FastHodFitting/fitting_smoothed_curves_nersc/
-
-
-# Run the HOD fitting with several initial random seeds
-python fasthod_fitting.py 1
-python fasthod_fitting.py 2
-python fasthod_fitting.py 3
-python fasthod_fitting.py 4
-python fasthod_fitting.py 5
-
+# Only do the halo paircounting in this step
+python cencen.py
+python censat.py
+python satsat.py
+python satsat_onehalo.py
