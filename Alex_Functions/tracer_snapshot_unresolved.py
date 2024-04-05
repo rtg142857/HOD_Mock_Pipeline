@@ -51,7 +51,7 @@ def get_mass_function(clean=True, redshift=0.2,
     measured_mass_function = np.array([mass_binc[keep], n_halo[keep]])
 
     # create mass function object
-    cosmology = CosmologyAbacus(cosmo, abacus_cosmologies_file)
+    cosmology = CosmologyAbacus(cosmo)
     mf = MassFunction(cosmology=cosmology, redshift=redshift, 
                       measured_mass_function=measured_mass_function)
     

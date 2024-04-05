@@ -34,7 +34,7 @@ def make_snapshot_tracers(file_number, output_file, clean=True, particles=False,
     
     print(file_name)
     
-    cosmology = CosmologyAbacus(cosmo, abacus_cosmologies_file)
+    cosmology = CosmologyAbacus(cosmo)
     
     # read in the halo catalogue
     halo_cat = AbacusSnapshot(file_name, snapshot_redshift=redshift, cosmology=cosmology, 
