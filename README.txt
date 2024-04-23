@@ -1,4 +1,5 @@
-Code for HOD fitting and mock creation from the AbacusSummit catalogues
+Code for HOD fitting and mock creation from the flamingo simulations on COSMA
+Branched off from code that fit from the AbacusSummit simulations on NERSC
 
 # HOD Fitting
 
