@@ -3,38 +3,45 @@ import numpy as np
 
 from halo_catalogue import AbacusSnapshot
 from galaxy_catalogue import GalaxyCatalogueSnapshot
-from cosmology import CosmologyAbacus
+from cosmology import CosmologyFlamingo
 from hod_tracer import HOD_Tracer
 
 
 
 def make_snapshot_tracers(file_number, output_file, clean=True, particles=False, redshift=0.2,
-                          simulation="base", box_size=2000, cosmo=0, ph=0, A=True, B=False,
-                          ntracer=3, log_mass_min=11, abacus_cosmologies_file="abacus_cosmologies.csv"):
+                          L, N, simulation,
+                          ntracer=3, log_mass_min=11):
     """
-    Make file of galaxy tracers for an Abacus simulation snapshot
+    Make file of galaxy tracers for a Flamingo simulation snapshot
     Args:
         file_number: snapshot file number (from 0 to 33)
         output_file: path of hdf5 file to save output
         clean:       use cleaned Abacus halo catalogue? Default is True
         particles:   use particles if True, NFW if False. Default is False
         redshift:    snapshot redshift. Default z=0.2
+        L:           Box length of the simulation (the 350 in e.g. L350N1800_DMO)
+        N:           Number of particles in the simulation (the 1800 in e.g. L350N1800_DMO)
+        simulation:  Specific version of the simulation (e.g. "DMO_FIDUCIAL", "HYDRO_STRONG_AGN")
+        ntracer:     number of satellite tracers per halo. Default is 3
+        log_mass_min: smallest halo mass to use. Default is logM = 11 Mpc/h
+
+    Old args used in the Abacus mocks:
         simulation:  Abacus simulation. Default is "base"
         box_size:    Simulation box size, in Mpc/h. Default is 2000 Mpc/h
         cosmo:       Abacus cosmology number. Default is 0
         ph:          Abacus simulation phase. Default is 0
         A:           if particles=True, use A particles? Default is True
         B:           if particles=True, use B particles? Default is False
-        ntracer:     number of satellite tracers per halo. Default is 3
-        log_mass_min: smallest halo mass to use. Default is logM = 11 Mpc/h
         abacus_cosmologies_file: file of Abacus cosmological parameters
     """
-    path = "/global/cfs/cdirs/desi/cosmosim/Abacus/AbacusSummit_%s_c%03d_ph%03d/halos/"%(simulation, cosmo, ph)
-    file_name = path+"z%.3f/halo_info/halo_info_%03d.asdf"%(redshift, file_number)
-    
-    print(file_name)
-    
-    cosmology = CosmologyAbacus(cosmo)
+    #path = "/global/cfs/cdirs/desi/cosmosim/Abacus/AbacusSummit_%s_c%03d_ph%03d/halos/"%(simulation, cosmo, ph)
+    #file_name = path+"z%.3f/halo_info/halo_info_%03d.asdf"%(redshift, file_number)
+    simulation_path = "/cosma8/data/dp004/flamingo/Runs/L" + str(L) + "N" + str(N) + "/" + simulation
+
+    print(simulation_path)
+
+    param_file_path = simulation_path + "/used_parameters.yml"
+    cosmology = CosmologyFlamingo(param_file_path)
     
     # read in the halo catalogue
     halo_cat = AbacusSnapshot(file_name, snapshot_redshift=redshift, cosmology=cosmology, 

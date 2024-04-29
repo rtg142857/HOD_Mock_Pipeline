@@ -4,6 +4,8 @@ import pandas as pd
 from scipy.interpolate import RegularGridInterpolator
 from cosmoprimo.fiducial import AbacusSummit
 from cosmoprimo import Cosmology as Cosmology_cosmoprimo
+import yaml
+
 
 class Cosmology(object):
     """
@@ -255,3 +257,26 @@ class CosmologyAbacus(Cosmology):
         idx = np.where(cosmo_number==cosmo)[0][0]
         
         return np.array(self.__param_array[idx,2:], dtype="f")
+
+class CosmologyFlamingo(param_file_path):
+    """
+    Flamingo simulation cosmology
+
+    Args:
+        param_file_path: Simulation input parameter file, e.g. "/cosma8/data/dp004/flamingo/Runs/L0100N0180/DMO_FIDUCIAL/flamingo_DMO.yml"
+    """
+    def __init__(self, param_file_path):
+        with open(param_file_path, "r" as file:
+            params = yaml.safe_load(file)
+
+        h = params["Cosmology"]["h"]
+        Omega_cdm = params["Cosmology"]["Omega_cdm"]
+        Omega_b = params["Cosmology"]["Omega_b"]
+        #sigma8=
+        #n_s=
+        engine="class"
+
+        cosmo_cosmoprimo = Cosmology_cosmoprimo(h=h, Omega_cdm=Omega_cdm, Omega_b=Omega_b, engine=engine)
+        # TODO: Be more specific with the things put into the cosmoprimo, e.g. with neutrinos
+
+        super().__init__(cosmo_cosmoprimo)
