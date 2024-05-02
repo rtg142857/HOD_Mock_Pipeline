@@ -1,11 +1,12 @@
 #!/bin/bash -l
 
-cosmo_number=0
-phase_number=0
+L=0100
+N=0180
+simulation="DMO_FIDUCIAL"
 
-mkdir "halo_fitting_${cosmo_number}_${phase_number}"
+mkdir "halo_fitting_L${L}N${N}_${simulation}"
 
-cd "halo_fitting_${cosmo_number}_${phase_number}"
+cd "halo_fitting_L${L}N${N}_${simulation}"
 
 mkdir logs
 
@@ -22,13 +23,17 @@ sed -i "s/cosmo_number = 0/cosmo_number = ${cosmo_number}/" rescaling_code/xi_re
 
 sed -i "s/cosmo_number = 0/cosmo_number = ${cosmo_number}/" rescaling_code/luminosity_function.py
 
-sed -i "s/ph = 0/ph = ${phase_number}/" tracer_snapshot.py
+sed -i "s/simulation = \"DMO_FIDUCIAL\"/simulation = \"${simulation}\"/" tracer_snapshot.py
 
-sed -i "s/cosmo = 0/cosmo = ${cosmo_number}/" tracer_snapshot.py
+sed -i "s/L = 100/L = ${L}/" tracer_snapshot.py
 
-sed -i "s/ph = 0/ph = ${phase_number}/" tracer_snapshot_unresolved.py
+sed -i "s/N = 180/N = ${N}/" tracer_snapshot.py
 
-sed -i "s/cosmo = 0/cosmo = ${cosmo_number}/" tracer_snapshot_unresolved.py
+sed -i "s/simulation = \"DMO_FIDUCIAL\"/simulation = \"${simulation}\"/" tracer_snapshot_unresolved.py
+
+sed -i "s/L = 100/L = ${L}/" tracer_snapshot_unresolved.py
+
+sed -i "s/N = 180/N = ${N}/" tracer_snapshot_unresolved.py
 
 #conda activate halo_env
 source /global/common/software/desi/users/adematti/cosmodesi_environment.sh main
