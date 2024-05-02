@@ -258,20 +258,25 @@ class CosmologyAbacus(Cosmology):
         
         return np.array(self.__param_array[idx,2:], dtype="f")
 
-class CosmologyFlamingo(param_file_path):
+class CosmologyFlamingo(L, N, simulation):
     """
     Flamingo simulation cosmology
 
     Args:
-        param_file_path: Simulation input parameter file, e.g. "/cosma8/data/dp004/flamingo/Runs/L0100N0180/DMO_FIDUCIAL/flamingo_DMO.yml"
+        L:          Box length of the simulation (the 350 in e.g. L350N1800_DMO)
+        N:          Number of particles in the simulation (the 1800 in e.g. L350N1800_DMO)
+        simulation:  Specific version of the simulation (e.g. "DMO_FIDUCIAL", "HYDRO_STRONG_AGN")
     """
-    def __init__(self, param_file_path):
-        with open(param_file_path, "r" as file:
-            params = yaml.safe_load(file)
+    def __init__(self, L, N, simulation):
+        # TODO: Get sigma8 and n_s from the initial condition parameter file (and find where it is)
+        run_param_file_path = "/cosma8/data/dp004/flamingo/Runs/L" + str(L) + "N" + str(N) + "/" + simulation + "/used_parameters.yml"
 
-        h = params["Cosmology"]["h"]
-        Omega_cdm = params["Cosmology"]["Omega_cdm"]
-        Omega_b = params["Cosmology"]["Omega_b"]
+        with open(param_file_path, "r") as file:
+            run_params = yaml.safe_load(file)
+
+        h = run_params["Cosmology"]["h"]
+        Omega_cdm = run_params["Cosmology"]["Omega_cdm"]
+        Omega_b = run_params["Cosmology"]["Omega_b"]
         #sigma8=
         #n_s=
         engine="class"

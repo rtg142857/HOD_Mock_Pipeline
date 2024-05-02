@@ -5,17 +5,19 @@ import h5py
 import matplotlib.pyplot as plt
 import gc
 from mass_function import MassFunction
-from cosmology import CosmologyAbacus
+from cosmology import CosmologyFlamingo
 
 
-def get_mass_function(clean=True, redshift=0.2,
-                      simulation="base", box_size=2000, cosmo=0, ph=0,
-                      abacus_cosmologies_file="abacus_cosmologies.csv"):
+def get_mass_function(clean=True, redshift=0.2, L, N, simulation):
     """
-    Get smooth fit to the mass function of an Abacus snapshot
+    Get smooth fit to the mass function of a Flamingo snapshot
     Args:
         clean:       use cleaned Abacus halo catalogue? Default is True
         redshift:    snapshot redshift. Default z=0.2
+        L:           Box length of the simulation (the 350 in e.g. L350N1800_DMO)
+        N:           Number of particles in the simulation (the 1800 in e.g. L350N1800_DMO)
+        simulation:  Specific version of the simulation (e.g. "DMO_FIDUCIAL", "HYDRO_STRONG_AGN")
+    Old args:
         simulation:  Abacus simulation. Default is "base"
         box_size:    Simulation box size, in Mpc/h. Default is 2000 Mpc/h
         cosmo:       Abacus cosmology number. Default is 0
@@ -23,8 +25,10 @@ def get_mass_function(clean=True, redshift=0.2,
         abacus_cosmologies_file: file of Abacus cosmological parameters
     """
     
-    path = "/global/cfs/cdirs/desi/cosmosim/Abacus/AbacusSummit_%s_c%03d_ph%03d/halos/"%(simulation, cosmo, ph)
-    file_name = path+"z%.3f/halo_info/halo_info_%03d.asdf"
+    #path = "/global/cfs/cdirs/desi/cosmosim/Abacus/AbacusSummit_%s_c%03d_ph%03d/halos/"%(simulation, cosmo, ph)
+    #file_name = path+"z%.3f/halo_info/halo_info_%03d.asdf"
+
+    simulation_path = "/cosma8/data/dp004/flamingo/Runs/L%03dN%03d/"%(L, N) + simulation
 
     # loop through all 34 files, reading in halo masses
     log_mass = [None]*34
@@ -51,7 +55,7 @@ def get_mass_function(clean=True, redshift=0.2,
     measured_mass_function = np.array([mass_binc[keep], n_halo[keep]])
 
     # create mass function object
-    cosmology = CosmologyAbacus(cosmo)
+    cosmology = CosmologyFlamingo(L, N, simulation)
     mf = MassFunction(cosmology=cosmology, redshift=redshift, 
                       measured_mass_function=measured_mass_function)
     
@@ -62,8 +66,7 @@ def get_mass_function(clean=True, redshift=0.2,
 
 
 def make_snapshot_tracers_unresolved(output_file, mass_function, logMmin, logMmax, 
-                                    redshift=0.2, simulation="base", box_size=2000, cosmo=0, ph=0,
-                                    abacus_cosmologies_file="abacus_cosmologies.csv"):
+                                    redshift=0.2, L, N, simulation):
     """
     Make file of central galaxy tracers for unresolved haloes, using Abacus field particles
     (particles not in haloes)
@@ -73,6 +76,10 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, logMmin, logMma
         logMmin:     minimum log halo mass to add
         logMmax      maximum log halo mass to add
         redshift:    snapshot redshift. Default z=0.2
+        L:           Box length of the simulation (the 350 in e.g. L350N1800_DMO)
+        N:           Number of particles in the simulation (the 1800 in e.g. L350N1800_DMO)
+        simulation:  Specific version of the simulation (e.g. "DMO_FIDUCIAL", "HYDRO_STRONG_AGN")
+    Old_args:
         simulation:  Abacus simulation. Default is "base"
         box_size:    Simulation box size, in Mpc/h. Default is 2000 Mpc/h
         cosmo:       Abacus cosmology number. Default is 0
@@ -83,8 +90,10 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, logMmin, logMma
     # number of random haloes we need to get correct mass function
     Nrand = mass_function.number_density_in_mass_bin(logMmin, logMmax) * (box_size**3)
     
-    # get total number of field particles (using A particles)
-    path = "/global/cfs/cdirs/desi/cosmosim/Abacus/AbacusSummit_%s_c%03d_ph%03d/halos/"%(simulation, cosmo, ph)
+    # get total number of field particles (formerly using A particles)
+    #path = "/global/cfs/cdirs/desi/cosmosim/Abacus/AbacusSummit_%s_c%03d_ph%03d/halos/"%(simulation, cosmo, ph)
+    simulation_path = "/cosma8/data/dp004/flamingo/Runs/L%03dN%03d/"%(L, N) + simulation
+    
     N = np.zeros(34, dtype="i")
     for file_number in range(34):
         # this loop is slow. Is there a faster way to get total number of field particles in each file?
@@ -136,26 +145,26 @@ if __name__ == "__main__":
     # use cleaned halo catalogue mass function
     clean=True
     
-    # base c000_ph000 simultion snapshot at z=0.2
-    simulation = "base"
-    cosmo = 0
-    ph = 0
-    box_size = 2000 #Mpc/h
-    redshift = 0.2
-    abacus_cosmologies_file = "abacus_cosmologies.csv"
+    # base L0100N0180 DMO_FIDUCIAL simultion snapshot
+    simulation = "DMO_FIDUCIAL"
+    L = 100
+    n = 180
+    #simulation = "base"
+    #cosmo = 0
+    #ph = 0
+    #box_size = 2000 #Mpc/h
+    #redshift = 0.2
+    #abacus_cosmologies_file = "abacus_cosmologies.csv"
     
     # masses of unressolved haloes to add
     logMmin = 10.3
     logMmax = 11
     
     # get halo mass function
-    mass_function = get_mass_function(clean=clean, redshift=redshift, simulation=simulation, 
-                                      box_size=box_size, cosmo=cosmo, ph=ph,
-                                      abacus_cosmologies_file=abacus_cosmologies_file)
+    mass_function = get_mass_function(clean=clean, redshift=redshift, L=L, N=N, simulation=simulation)
            
     # make file of central tracers, using particles, assigning random masses from mass function
     # this function automatically loops through all 34 files
     make_snapshot_tracers_unresolved(output_file, mass_function, logMmin, logMmax, 
-                                    redshift=redshift, simulation=simulation, box_size=box_size, 
-                                    cosmo=cosmo, ph=ph, abacus_cosmologies_file=abacus_cosmologies_file)
+                                    redshift=redshift, L=L, N=N, simulation=simulation)
   

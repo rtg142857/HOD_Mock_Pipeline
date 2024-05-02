@@ -36,12 +36,11 @@ def make_snapshot_tracers(file_number, output_file, clean=True, particles=False,
     """
     #path = "/global/cfs/cdirs/desi/cosmosim/Abacus/AbacusSummit_%s_c%03d_ph%03d/halos/"%(simulation, cosmo, ph)
     #file_name = path+"z%.3f/halo_info/halo_info_%03d.asdf"%(redshift, file_number)
-    simulation_path = "/cosma8/data/dp004/flamingo/Runs/L" + str(L) + "N" + str(N) + "/" + simulation
-
+    simulation_path = "/cosma8/data/dp004/flamingo/Runs/L%03dN%03d/"%(L, N) + simulation
+    
     print(simulation_path)
 
-    param_file_path = simulation_path + "/used_parameters.yml"
-    cosmology = CosmologyFlamingo(param_file_path)
+    cosmology = CosmologyFlamingo(L, N, simulation)
     
     # read in the halo catalogue
     halo_cat = AbacusSnapshot(file_name, snapshot_redshift=redshift, cosmology=cosmology, 
@@ -147,14 +146,16 @@ if __name__ == "__main__":
     # number of satellite tracers for each halo
     ntracer = 3
     
-    # base c000_ph000 simultion snapshot at z=0.2
-    simulation = "base"
-    cosmo = 0
-    ph = 0
-    box_size = 2000 #Mpc/h
-    redshift = 0.2
-    log_mass_min = 11 # set the minimim halo mass we want
-    abacus_cosmologies_file = "abacus_cosmologies.csv"
+    # base L0100N0180 DMO_FIDUCIAL simultion snapshot
+    simulation = "DMO_FIDUCIAL"
+    L = 100
+    n = 180
+    #simulation = "base"
+    #cosmo = 0
+    #ph = 0
+    #box_size = 2000 #Mpc/h
+    #redshift = 0.2
+    #abacus_cosmologies_file = "abacus_cosmologies.csv"
     
     # for NFW profile
     particles=False
@@ -171,8 +172,7 @@ if __name__ == "__main__":
     # use the add_missing_particles function to add these missing particles, using other haloes of the same mass
     for i in range(34):
         make_snapshot_tracers(i, output_file%i, clean=clean, particles=particles, redshift=redshift,
-                          simulation=simulation, box_size=box_size, cosmo=cosmo, ph=ph, A=A, B=B,
-                          ntracer=ntracer, log_mass_min=log_mass_min,
-                          abacus_cosmologies_file=abacus_cosmologies_file)
+                          L=L, N=N, simulation=simulation,
+                          ntracer=ntracer, log_mass_min=log_mass_min)
         
         # add_missing_particles(output_file%i, box_size=box_size)
