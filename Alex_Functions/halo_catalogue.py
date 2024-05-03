@@ -125,9 +125,30 @@ class HaloCatalogue(Catalogue):
 
         return conc_mod
 
-    
-    
+class FlamingoSnapshot(HaloCatalogue):
+    """
+    Flamingo halo catalogue from simulation snapshot
 
+    Args:
+        file_name: The path to the hdf5 file containing the halo
+        snapshot_redshift: The redshift of the snapshot
+        cosmology: Cosmology object (see cosmology.py)
+        particles: use particles if True, NFW if False. Default is False
+        L: Box length (the 100 in L100N180)
+    """
+    def __init__(self, file_name, snapshot_redshift, cosmology,
+                 particles=False, L):
+        self.cosmology = cosmology
+        self.box_size = L
+
+        # read halo catalogue file
+
+        # self.so_density is not needed MAYBE; double-check
+        # What is needed:
+        # halo_cat.get("mass")
+        # halo_cat.cut
+        # halo_cat.init
+        # The stuff from GalaxyCatalogueSnapshot init: GalaxyCatalogue.haloes, GalaxyCatalogueSnapshot.haloes
 
 class AbacusSnapshot(HaloCatalogue):
     """
