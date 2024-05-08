@@ -343,7 +343,7 @@ class GalaxyCatalogueSnapshot(GalaxyCatalogue):
     """
     Galaxy catalogue for a simuation snapshot
     Args:
-        haloes:    halo catalogue
+        haloes:    halo catalogue (in form of AbacusSnapshot/FlamingoSnapshot)
         cosmology: object of the class Cosmology
         box_size:  comoving simulation box length (Mpc/h)
     """
