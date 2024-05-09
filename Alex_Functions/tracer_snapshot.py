@@ -1,27 +1,26 @@
 import h5py
 import numpy as np
 
-from halo_catalogue import AbacusSnapshot
+from halo_catalogue import FlamingoSnapshot
 from galaxy_catalogue import GalaxyCatalogueSnapshot
 from cosmology import CosmologyFlamingo
 from hod_tracer import HOD_Tracer
 
 
 
-def make_snapshot_tracers(file_number, output_file, clean=True, particles=False, redshift=0.2,
+def make_snapshot_tracers(file_number, output_file,
                           L, N, simulation,
-                          ntracer=3, log_mass_min=11):
+                          particles=False, redshift=0.2, ntracer=3, log_mass_min=11):
     """
     Make file of galaxy tracers for a Flamingo simulation snapshot
     Args:
         file_number: snapshot file number (from 0 to 33)
         output_file: path of hdf5 file to save output
-        clean:       use cleaned Abacus halo catalogue? Default is True
-        particles:   use particles if True, NFW if False. Default is False
-        redshift:    snapshot redshift. Default z=0.2
         L:           Box length of the simulation (the 350 in e.g. L350N1800_DMO)
         N:           Number of particles in the simulation (the 1800 in e.g. L350N1800_DMO)
         simulation:  Specific version of the simulation (e.g. "DMO_FIDUCIAL", "HYDRO_STRONG_AGN")
+        particles:   use particles if True, NFW if False. Default is False; TRUE NOT YET SUPPORTED WITH FLAMINGO
+        redshift:    snapshot redshift. Default z=0.2
         ntracer:     number of satellite tracers per halo. Default is 3
         log_mass_min: smallest halo mass to use. Default is logM = 11 Mpc/h
 
@@ -33,6 +32,7 @@ def make_snapshot_tracers(file_number, output_file, clean=True, particles=False,
         A:           if particles=True, use A particles? Default is True
         B:           if particles=True, use B particles? Default is False
         abacus_cosmologies_file: file of Abacus cosmological parameters
+        clean:       use cleaned Abacus halo catalogue? Default is True
     """
     #path = "/global/cfs/cdirs/desi/cosmosim/Abacus/AbacusSummit_%s_c%03d_ph%03d/halos/"%(simulation, cosmo, ph)
     #file_name = path+"z%.3f/halo_info/halo_info_%03d.asdf"%(redshift, file_number)
@@ -43,14 +43,14 @@ def make_snapshot_tracers(file_number, output_file, clean=True, particles=False,
     cosmology = CosmologyFlamingo(L, N, simulation)
     
     # read in the halo catalogue
-    halo_cat = AbacusSnapshot(file_name, snapshot_redshift=redshift, cosmology=cosmology, 
-                              box_size=box_size, clean=clean, particles=particles, A=A, B=B)
+    halo_cat = FlamingoSnapshot(file_name, snapshot_redshift=redshift, cosmology=cosmology, 
+                              L=L, particles=particles)
     
     # cut to haloes above minimum mass
     halo_cat.cut(halo_cat.get("mass") >= 10**log_mass_min)
     
     # create empty galaxy catalogue
-    gal_cat = GalaxyCatalogueSnapshot(halo_cat, cosmology, box_size)
+    gal_cat = GalaxyCatalogueSnapshot(halo_cat, cosmology, L)
     
     # use HOD to add galaxy tracers to the catalogue
     hod = HOD_Tracer(ntracer=ntracer)
@@ -171,8 +171,8 @@ if __name__ == "__main__":
     # if using particles, some of the low mass haloes do not have enough to position all satellite tracers
     # use the add_missing_particles function to add these missing particles, using other haloes of the same mass
     for i in range(34):
-        make_snapshot_tracers(i, output_file%i, clean=clean, particles=particles, redshift=redshift,
-                          L=L, N=N, simulation=simulation,
-                          ntracer=ntracer, log_mass_min=log_mass_min)
+        make_snapshot_tracers(i, output_file%i, L=L, N=N, simulation=simulation,
+                              particles=False, redshift=redshift,
+                              ntracer=ntracer, log_mass_min=log_mass_min)
         
         # add_missing_particles(output_file%i, box_size=box_size)

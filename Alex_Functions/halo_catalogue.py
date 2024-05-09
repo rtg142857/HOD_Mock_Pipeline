@@ -133,8 +133,8 @@ class FlamingoSnapshot(HaloCatalogue):
         file_name: The path to the hdf5 file containing the halos
         snapshot_redshift: The redshift of the snapshot
         cosmology: Cosmology object (see cosmology.py)
-        particles: use particles if True, NFW if False. Default is False
         L: Box length (the 100 in L100N180)
+        particles: use particles if True, NFW if False. Default is False; TRUE IS NOT YET SUPPORTED
     """
     def __init__(self, file_name, snapshot_redshift, cosmology, L,
                  particles=False):
