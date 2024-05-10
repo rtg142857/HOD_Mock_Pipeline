@@ -1,23 +1,22 @@
-from abacusnbody.data.compaso_halo_catalog import CompaSOHaloCatalog
-from abacusnbody.data.read_abacus import read_asdf
 import numpy as np
 import h5py
 import matplotlib.pyplot as plt
 import gc
+import swiftsimio as sw
 from mass_function import MassFunction
 from cosmology import CosmologyFlamingo
 
 
-def get_mass_function(clean=True, redshift=0.2, L, N, simulation):
+def get_mass_function(L, N, simulation, redshift):
     """
     Get smooth fit to the mass function of a Flamingo snapshot
     Args:
-        clean:       use cleaned Abacus halo catalogue? Default is True
-        redshift:    snapshot redshift. Default z=0.2
         L:           Box length of the simulation (the 350 in e.g. L350N1800_DMO)
         N:           Number of particles in the simulation (the 1800 in e.g. L350N1800_DMO)
         simulation:  Specific version of the simulation (e.g. "DMO_FIDUCIAL", "HYDRO_STRONG_AGN")
+        redshift:    snapshot redshift.
     Old args:
+        clean:       use cleaned Abacus halo catalogue? Default is True
         simulation:  Abacus simulation. Default is "base"
         box_size:    Simulation box size, in Mpc/h. Default is 2000 Mpc/h
         cosmo:       Abacus cosmology number. Default is 0
@@ -33,11 +32,15 @@ def get_mass_function(clean=True, redshift=0.2, L, N, simulation):
     # loop through all 34 files, reading in halo masses
     log_mass = [None]*34
     for file_number in range(34):
-        input_file = file_name%(redshift, file_number)
+        #input_file = file_name%(redshift, file_number)
 
-        halo_cat = CompaSOHaloCatalog(input_file, cleaned=True, fields=['N'])
-        m_par = halo_cat.header["ParticleMassHMsun"]
-        log_mass[file_number] = np.log10(np.array(halo_cat.halos["N"])*m_par)
+        halo_cat = h5py.File(input_file, "r")
+        m_par = halo_cat["SO"]["DarkMatterMass"][0] / halo_cat["SO"]["NumberOfDarkMatterParticles"][0]
+        log_mass[file_number] = np.log10(np.array(halo_cat["SO"]["DarkMatterMass"]))
+
+        #halo_cat = CompaSOHaloCatalog(input_file, cleaned=True, fields=['N'])
+        #m_par = halo_cat.header["ParticleMassHMsun"]
+        #log_mass[file_number] = np.log10(np.array(halo_cat.halos["N"])*m_par)
         
         print(file_number, len(log_mass[file_number]))
 
@@ -48,7 +51,7 @@ def get_mass_function(clean=True, redshift=0.2, L, N, simulation):
     mass_bins = np.arange(10,16,bin_size)
     mass_binc = mass_bins[:-1]+bin_size/2.
     hist, bins = np.histogram(log_mass, bins=mass_bins)
-    n_halo = hist/bin_size/box_size**3
+    n_halo = hist/bin_size/L**3
     
     # remove bins with zero haloes
     keep = n_halo > 0
@@ -66,7 +69,7 @@ def get_mass_function(clean=True, redshift=0.2, L, N, simulation):
 
 
 def make_snapshot_tracers_unresolved(output_file, mass_function, logMmin, logMmax, 
-                                    redshift=0.2, L, N, simulation):
+                                    redshift, L, N, simulation):
     """
     Make file of central galaxy tracers for unresolved haloes, using Abacus field particles
     (particles not in haloes)
@@ -75,7 +78,7 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, logMmin, logMma
         mass_function: halo mass function, of class MassFunction
         logMmin:     minimum log halo mass to add
         logMmax      maximum log halo mass to add
-        redshift:    snapshot redshift. Default z=0.2
+        redshift:    snapshot redshift.
         L:           Box length of the simulation (the 350 in e.g. L350N1800_DMO)
         N:           Number of particles in the simulation (the 1800 in e.g. L350N1800_DMO)
         simulation:  Specific version of the simulation (e.g. "DMO_FIDUCIAL", "HYDRO_STRONG_AGN")
@@ -88,7 +91,7 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, logMmin, logMma
     """
     
     # number of random haloes we need to get correct mass function
-    Nrand = mass_function.number_density_in_mass_bin(logMmin, logMmax) * (box_size**3)
+    Nrand = mass_function.number_density_in_mass_bin(logMmin, logMmax) * (L**3)
     
     # get total number of field particles (formerly using A particles)
     #path = "/global/cfs/cdirs/desi/cosmosim/Abacus/AbacusSummit_%s_c%03d_ph%03d/halos/"%(simulation, cosmo, ph)
@@ -97,7 +100,13 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, logMmin, logMma
     N = np.zeros(34, dtype="i")
     for file_number in range(34):
         # this loop is slow. Is there a faster way to get total number of field particles in each file?
-        file_name = path+"z%.3f/field_rv_A/field_rv_A_%03d.asdf"%(redshift, file_number)
+        #file_name = path+"z%.3f/field_rv_A/field_rv_A_%03d.asdf"%(redshift, file_number)
+        # Want the field particles in a SWIFT snapshot
+        # TODO: Actually make it use the field particles; currently just does all of them
+        file = h5py.File(file_name, "r")
+
+
+
         data = read_asdf(file_name, load_pos=True, load_vel=False)
         p = data["pos"]
         del data
