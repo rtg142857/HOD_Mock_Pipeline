@@ -166,7 +166,8 @@ class FlamingoSnapshot(HaloCatalogue):
             'pos':   halo_cat["SO"]["200_mean"]["CentreOfMass"],
             'vel':   halo_cat["SO"]["200_mean"]["CentreOfMassVelocity"],
             'mass':  halo_cat["SO"]["200_mean"]["DarkMatterMass"],
-            'rvmax': halo_cat["SO"]["200_mean"]["MaximumCircularVelocityRadius"]
+            'rvmax': halo_cat["BoundSubhaloProperties"]["MaximumCircularVelocityRadius"]
+            # TODO: Check if the maximum circ velocity radius can be done via SO
             #'r200': halo_cat["Subhalos"]["BoundR200CritComoving"]
         }
 
