@@ -8,13 +8,12 @@ from hod_tracer import HOD_Tracer
 
 
 
-def make_snapshot_tracers(file_number, output_file,
+def make_snapshot_tracers(output_file,
                           L, N, simulation,
                           particles=False, redshift=0.2, ntracer=3, log_mass_min=11):
     """
     Make file of galaxy tracers for a Flamingo simulation snapshot
     Args:
-        file_number: snapshot file number (from 0 to 33)
         output_file: path of hdf5 file to save output
         L:           Box length of the simulation (the 350 in e.g. L350N1800_DMO)
         N:           Number of particles in the simulation (the 1800 in e.g. L350N1800_DMO)
@@ -25,6 +24,7 @@ def make_snapshot_tracers(file_number, output_file,
         log_mass_min: smallest halo mass to use. Default is logM = 11 Mpc/h
 
     Old args used in the Abacus mocks:
+        file_number: snapshot file number (from 0 to 33)
         simulation:  Abacus simulation. Default is "base"
         box_size:    Simulation box size, in Mpc/h. Default is 2000 Mpc/h
         cosmo:       Abacus cosmology number. Default is 0
@@ -138,7 +138,7 @@ def add_missing_particles(output_file, box_size=2000):
 if __name__ == "__main__":
 
     path = "" #path to save the output files
-    output_file = path+"galaxy_tracers_%i.hdf5"
+    output_file = path+"galaxy_tracers_0.hdf5"
     
     # use cleaned halo catalogue
     clean=True
@@ -149,7 +149,11 @@ if __name__ == "__main__":
     # base L0100N0180 DMO_FIDUCIAL simultion snapshot
     simulation = "DMO_FIDUCIAL"
     L = 100
-    n = 180
+    N = 180
+
+    redshift=
+
+    log_mass_min = 11
     #simulation = "base"
     #cosmo = 0
     #ph = 0
@@ -168,10 +172,8 @@ if __name__ == "__main__":
     #B = False
     
     # loop through the 34 snapshot files, adding tracers, and saving the output to a file
-    # if using particles, some of the low mass haloes do not have enough to position all satellite tracers
-    # use the add_missing_particles function to add these missing particles, using other haloes of the same mass
-    for i in range(34):
-        make_snapshot_tracers(i, output_file%i, L=L, N=N, simulation=simulation,
+    #for i in range(34):
+    make_snapshot_tracers(output_file, L=L, N=N, simulation=simulation,
                               particles=False, redshift=redshift,
                               ntracer=ntracer, log_mass_min=log_mass_min)
         

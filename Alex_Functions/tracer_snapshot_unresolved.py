@@ -157,7 +157,7 @@ if __name__ == "__main__":
     # base L0100N0180 DMO_FIDUCIAL simultion snapshot
     simulation = "DMO_FIDUCIAL"
     L = 100
-    n = 180
+    N = 180
     #simulation = "base"
     #cosmo = 0
     #ph = 0
