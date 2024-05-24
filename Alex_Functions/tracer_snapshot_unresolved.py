@@ -28,6 +28,8 @@ def get_mass_function(L, N, simulation, redshift):
     #file_name = path+"z%.3f/halo_info/halo_info_%03d.asdf"
 
     simulation_path = "/cosma8/data/dp004/flamingo/Runs/L%03dN%03d/"%(L, N) + simulation
+    input_file = "/cosma8/data/dp004/flamingo/Runs/L1000N1800/DMO_FIDUCIAL/SOAP/halo_properties_0077.hdf5"
+    print("WARNING: Using incorrect path for making unresolved snapshot tracers")
 
     # loop through all 34 files, reading in halo masses
     log_mass = [None]*34
@@ -148,7 +150,7 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, logMmin, logMma
         
 if __name__ == "__main__":
     
-    path = "" #path to save the output files
+    path = "tracer_output" #path to save the output files
     output_file = path+"galaxy_tracers_unresolved_%i.hdf5"
     
     # use cleaned halo catalogue mass function
@@ -164,6 +166,9 @@ if __name__ == "__main__":
     #box_size = 2000 #Mpc/h
     #redshift = 0.2
     #abacus_cosmologies_file = "abacus_cosmologies.csv"
+    sw_data = sw.load("/cosma8/data/dp004/flamingo/Runs/L1000N1800/DMO_FIDUCIAL/snapshots/flamingo_0077/flamingo_0077.0.hdf5")
+    print("WARNING: Using incorrect path for loading redshift")
+    redshift=sw_data.metadata.redshift
     
     # masses of unressolved haloes to add
     logMmin = 10.3
@@ -171,9 +176,9 @@ if __name__ == "__main__":
     
     # get halo mass function
     mass_function = get_mass_function(clean=clean, redshift=redshift, L=L, N=N, simulation=simulation)
-           
+    
     # make file of central tracers, using particles, assigning random masses from mass function
     # this function automatically loops through all 34 files
-    make_snapshot_tracers_unresolved(output_file, mass_function, logMmin, logMmax, 
-                                    redshift=redshift, L=L, N=N, simulation=simulation)
+    #make_snapshot_tracers_unresolved(output_file, mass_function, logMmin, logMmax, redshift=redshift, L=L, N=N, simulation=simulation)
+    print("WARNING: Not creating any unresolved tracers")
   

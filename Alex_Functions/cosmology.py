@@ -269,7 +269,9 @@ class CosmologyFlamingo(Cosmology):
     """
     def __init__(self, L, N, simulation):
         # TODO: Get sigma8 and n_s from the initial condition parameter file (and find where it is)
-        param_file_path = "/cosma8/data/dp004/flamingo/Runs/L" + str(L) + "N" + str(N) + "/" + simulation + "/used_parameters.yml"
+        #param_file_path = "/cosma8/data/dp004/flamingo/Runs/L" + str(L) + "N" + str(N) + "/" + simulation + "/used_parameters.yml"
+        param_file_path = "/cosma8/data/dp004/flamingo/Runs/L1000N1800/DMO_FIDUCIAL/used_parameters.yml"
+        print("WARNING: Using incorrect path in loading cosmology")
 
         with open(param_file_path, "r") as file:
             run_params = yaml.safe_load(file)
