@@ -28,7 +28,7 @@ def get_mass_function(L, N, simulation, redshift):
     #file_name = path+"z%.3f/halo_info/halo_info_%03d.asdf"
 
     simulation_path = "/cosma8/data/dp004/flamingo/Runs/L%03dN%03d/"%(L, N) + simulation
-    input_file = "/cosma8/data/dp004/flamingo/Runs/L1000N1800/DMO_FIDUCIAL/SOAP/halo_properties_0077.hdf5"
+    input_file = "/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_soap.hdf5"
     print("WARNING: Using incorrect path for making unresolved snapshot tracers")
 
     # loop through all 34 files, reading in halo masses
@@ -166,7 +166,7 @@ if __name__ == "__main__":
     #box_size = 2000 #Mpc/h
     #redshift = 0.2
     #abacus_cosmologies_file = "abacus_cosmologies.csv"
-    sw_data = sw.load("/cosma8/data/dp004/flamingo/Runs/L1000N1800/DMO_FIDUCIAL/snapshots/flamingo_0077/flamingo_0077.0.hdf5")
+    sw_data = sw.load("/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_snapshot_77")
     print("WARNING: Using incorrect path for loading redshift")
     redshift=sw_data.metadata.redshift
     

@@ -37,7 +37,7 @@ def make_snapshot_tracers(output_file,
     #path = "/global/cfs/cdirs/desi/cosmosim/Abacus/AbacusSummit_%s_c%03d_ph%03d/halos/"%(simulation, cosmo, ph)
     #file_name = path+"z%.3f/halo_info/halo_info_%03d.asdf"%(redshift, file_number)
     simulation_path = "/cosma8/data/dp004/flamingo/Runs/L%03dN%03d/"%(L, N) + simulation
-    file_name = "/cosma8/data/dp004/flamingo/Runs/L1000N1800/DMO_FIDUCIAL/SOAP/halo_properties_0077.hdf5"
+    file_name = "/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_soap.hdf5"
     print("WARNING: Using incorrect path for making resolved snapshot tracers")
     
     print(simulation_path)
@@ -154,7 +154,7 @@ if __name__ == "__main__":
     N = 180
 
     #sw_data = sw.load("/cosma8/data/dp004/flamingo/Runs/L%03dN%03d/"%(L, N) + simulation)
-    sw_data = sw.load("/cosma8/data/dp004/flamingo/Runs/L1000N1800/DMO_FIDUCIAL/snapshots/flamingo_0077/flamingo_0077.0.hdf5")
+    sw_data = sw.load("/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_snapshot_77")
     print("WARNING: Using incorrect path for loading redshift")
     redshift=sw_data.metadata.redshift
 
