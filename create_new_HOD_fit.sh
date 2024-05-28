@@ -36,18 +36,20 @@ sed -i "s/L = 100/L = ${L}/" tracer_snapshot_unresolved.py
 sed -i "s/N = 180/N = ${N}/" tracer_snapshot_unresolved.py
 
 #conda activate halo_env
-source /global/common/software/desi/users/adematti/cosmodesi_environment.sh main
+#source /global/common/software/desi/users/adematti/cosmodesi_environment.sh main
+module use /cosma/home/dp004/dc-mene1/software/desi/cosmodesiconda/my-desiconda/modulefiles
+module load cosmodesiconda/my-desiconda
 
-python rescaling_code/xi_rescaling_factor.py
+#python rescaling_code/xi_rescaling_factor.py
 
-python rescaling_code/luminosity_function.py
+#python rescaling_code/luminosity_function.py
 
 git clone "https://github.com/amjsmith/FastHodFitting"
 
 git clone "https://github.com/amjsmith/shared_code/"
 
-cp cosmology_rescaling_factor_xi_lin_8.txt FastHodFitting/fitting_smoothed_curves_nersc/cosmology_rescaling_factor_xi_lin_8.txt
-cp target_num_den_rescaled.txt FastHodFitting/fitting_smoothed_curves_nersc/target_num_den_rescaled.txt
+#cp cosmology_rescaling_factor_xi_lin_8.txt FastHodFitting/fitting_smoothed_curves_nersc/cosmology_rescaling_factor_xi_lin_8.txt
+#cp target_num_den_rescaled.txt FastHodFitting/fitting_smoothed_curves_nersc/target_num_den_rescaled.txt
 #cp -r ../FastHodFitting/ ./
 
 jid1=$(sbatch --parsable batch_hod_fitting.sh)

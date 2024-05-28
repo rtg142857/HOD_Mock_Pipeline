@@ -1,23 +1,27 @@
 #!/bin/bash -l
 
-#!/bin/bash
-#SBATCH -q regular
+#SBATCH --ntasks 1 # The number of cores you need...
+#SBATCH -J HOD_pipeline_testing #Give it something meaningful.
 #SBATCH -o logs/tracer_snap
-#SBATCH --time=720
-#SBATCH --nodes=1
-#SBATCH --tasks-per-node=1
-#SBATCH -C cpu
-#SBATCH --mail-user=tlrt88@durham.ac.uk
+#SBATCH -e logs/tracer_snap_error
+#SBATCH -p cosma7 #or some other partition, e.g. cosma, cosma8, etc.
+#SBATCH -A dp004
+#SBATCH --exclusive
+#SBATCH -t 720
+#SBATCH --mail-type=END # notifications for job done & fail
+#SBATCH --mail-user=tlrt88@durham.ac.uk #PLEASE PUT YOUR EMAIL ADDRESS HERE (without the <>)
 
-#conda activate halo_env
-#source activate abacus-p
-
+module purge
 #cosmodesienv main
-conda activate abacus-env
+#conda activate abacus-env
+module use /cosma/home/dp004/dc-mene1/software/desi/cosmodesiconda/my-desiconda/modulefiles
+module load cosmodesiconda/my-desiconda
 
-module load gcc
-module load gsl
-module unload craype-hugepages2M
+#module load gcc
+#module load gsl
+#module unload craype-hugepages2M
 
-python3 tracer_snapshot.py
-python3 tracer_snapshot_unresolved.py
+module load python/3.10.12
+
+python tracer_snapshot.py
+python tracer_snapshot_unresolved.py
