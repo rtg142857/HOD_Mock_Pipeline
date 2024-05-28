@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
-L=0100
-N=0180
+L=100
+N=180
 simulation="DMO_FIDUCIAL"
 
 mkdir "halo_fitting_L${L}N${N}_${simulation}"
