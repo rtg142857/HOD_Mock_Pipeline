@@ -154,7 +154,7 @@ if __name__ == "__main__":
     N = 180
 
     #sw_data = sw.load("/cosma8/data/dp004/flamingo/Runs/L%03dN%03d/"%(L, N) + simulation)
-    sw_data = sw.load("/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_snapshot_77")
+    sw_data = sw.load("/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_snapshot_77.hdf5")
     print("WARNING: Using incorrect path for loading redshift")
     redshift=sw_data.metadata.redshift
 

@@ -166,7 +166,7 @@ if __name__ == "__main__":
     #box_size = 2000 #Mpc/h
     #redshift = 0.2
     #abacus_cosmologies_file = "abacus_cosmologies.csv"
-    sw_data = sw.load("/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_snapshot_77")
+    sw_data = sw.load("/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_snapshot_77.hdf5")
     print("WARNING: Using incorrect path for loading redshift")
     redshift=sw_data.metadata.redshift
     

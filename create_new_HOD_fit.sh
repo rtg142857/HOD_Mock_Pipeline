@@ -44,9 +44,9 @@ module load cosmodesiconda/my-desiconda
 
 #python rescaling_code/luminosity_function.py
 
-git clone "https://github.com/amjsmith/FastHodFitting"
+git clone --depth 1 "https://github.com/amjsmith/FastHodFitting"
 
-git clone "https://github.com/amjsmith/shared_code/"
+git clone --depth 1 "https://github.com/amjsmith/shared_code/"
 
 #cp cosmology_rescaling_factor_xi_lin_8.txt FastHodFitting/fitting_smoothed_curves_nersc/cosmology_rescaling_factor_xi_lin_8.txt
 #cp target_num_den_rescaled.txt FastHodFitting/fitting_smoothed_curves_nersc/target_num_den_rescaled.txt
