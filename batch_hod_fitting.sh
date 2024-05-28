@@ -4,7 +4,7 @@
 #SBATCH -J HOD_pipeline_testing #Give it something meaningful.
 #SBATCH -o logs/tracer_snap
 #SBATCH -e logs/tracer_snap_error
-#SBATCH -p cosma7 #or some other partition, e.g. cosma, cosma8, etc.
+#SBATCH -p cosma8 #or some other partition, e.g. cosma, cosma8, etc.
 #SBATCH -A dp004
 #SBATCH --exclusive
 #SBATCH -t 720

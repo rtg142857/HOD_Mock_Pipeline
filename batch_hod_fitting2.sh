@@ -4,7 +4,7 @@
 #SBATCH -J paircounting #Give it something meaningful.
 #SBATCH -o logs/tracer_snap2
 #SBATCH -e logs/tracer_snap2_error
-#SBATCH -p cosma7 #or some other partition, e.g. cosma, cosma8, etc.
+#SBATCH -p cosma8 #or some other partition, e.g. cosma, cosma8, etc.
 #SBATCH -A dp004
 #SBATCH --exclusive
 #SBATCH -t 720
