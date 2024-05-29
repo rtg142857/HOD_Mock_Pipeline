@@ -154,7 +154,7 @@ if __name__ == "__main__":
     output_file = path+"galaxy_tracers_unresolved_%i.hdf5"
     
     # use cleaned halo catalogue mass function
-    clean=True
+    #clean=True
     
     # base L0100N0180 DMO_FIDUCIAL simultion snapshot
     simulation = "DMO_FIDUCIAL"
@@ -175,7 +175,7 @@ if __name__ == "__main__":
     logMmax = 11
     
     # get halo mass function
-    mass_function = get_mass_function(clean=clean, redshift=redshift, L=L, N=N, simulation=simulation)
+    mass_function = get_mass_function(redshift=redshift, L=L, N=N, simulation=simulation)
     
     # make file of central tracers, using particles, assigning random masses from mass function
     # this function automatically loops through all 34 files
