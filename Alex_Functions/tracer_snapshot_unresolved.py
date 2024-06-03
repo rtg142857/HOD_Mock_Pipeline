@@ -5,6 +5,7 @@ import gc
 import swiftsimio as sw
 from mass_function import MassFunction
 from cosmology import CosmologyFlamingo
+import yaml
 
 
 def get_mass_function(L, N, simulation, redshift):
@@ -29,7 +30,7 @@ def get_mass_function(L, N, simulation, redshift):
 
     simulation_path = "/cosma8/data/dp004/flamingo/Runs/L%03dN%03d/"%(L, N) + simulation
     input_file = "/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_soap.hdf5"
-    print("WARNING: Using incorrect path for making unresolved snapshot tracers")
+    print("WARNING: Using incorrect path for making unresolved snapshot tracer halo mass function")
 
     # loop through all 34 files, reading in halo masses
     log_mass = [None]*34
@@ -71,7 +72,7 @@ def get_mass_function(L, N, simulation, redshift):
 
 
 def make_snapshot_tracers_unresolved(output_file, mass_function, logMmin, logMmax, 
-                                    redshift, L, N, simulation):
+                                    redshift, L, N, simulation, group_id_default):
     """
     Make file of central galaxy tracers for unresolved haloes, using Abacus field particles
     (particles not in haloes)
@@ -84,7 +85,8 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, logMmin, logMma
         L:           Box length of the simulation (the 350 in e.g. L350N1800_DMO)
         N:           Number of particles in the simulation (the 1800 in e.g. L350N1800_DMO)
         simulation:  Specific version of the simulation (e.g. "DMO_FIDUCIAL", "HYDRO_STRONG_AGN")
-    Old_args:
+        group_id_default: Default halo ID for particles that aren't in any FOF halo
+    Old args:
         simulation:  Abacus simulation. Default is "base"
         box_size:    Simulation box size, in Mpc/h. Default is 2000 Mpc/h
         cosmo:       Abacus cosmology number. Default is 0
@@ -100,21 +102,26 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, logMmin, logMma
     simulation_path = "/cosma8/data/dp004/flamingo/Runs/L%03dN%03d/"%(L, N) + simulation
     
     N = np.zeros(34, dtype="i")
-    for file_number in range(34):
+    field_boolean = np.empty(34, dtype=np.ndarray)
+    for file_number in range(1):
         # this loop is slow. Is there a faster way to get total number of field particles in each file?
         #file_name = path+"z%.3f/field_rv_A/field_rv_A_%03d.asdf"%(redshift, file_number)
-        # Want the field particles in a SWIFT snapshot
-        # TODO: Actually make it use the field particles; currently just does all of them
-        file = h5py.File(file_name, "r")
+        file_name = "/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_snapshot_77.hdf5"
+        print("WARNING: Using incorrect path for making unresolved snapshot tracers")
 
+        #file = h5py.File(file_name, "r")
+        #data = read_asdf(file_name, load_pos=True, load_vel=False)
+        #p = data["pos"]
 
-
-        data = read_asdf(file_name, load_pos=True, load_vel=False)
-        p = data["pos"]
+        data = sw.load(file_name)
+        p = (data.dark_matter.fofgroup_ids == group_id_default)
         del data
-        N[file_number] = p.shape[0]
+        field_boolean[file_number] = p
+        N[file_number] = p.sum()
         gc.collect() # need to run garbage collection to release memory
         
+    ##################the above should be looped over all files with the right snapshot
+
     # total number of field particles in full snapshot
     Npar = np.sum(N)
     
@@ -122,19 +129,23 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, logMmin, logMma
     prob = Nrand*1.0 / Npar
     
     for file_number in range(34):
-        file_name = path+"z%.3f/field_rv_A/field_rv_A_%03d.asdf"%(redshift, file_number)
+        #file_name = path+"z%.3f/field_rv_A/field_rv_A_%03d.asdf"%(redshift, file_number)
+        file_name = "/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_snapshot_77.hdf5"
+        print("WARNING: Using incorrect path for making unresolved snapshot tracers")
         print(file_name)
         
         # choose random particles to keep, based on probability
-        keep = np.random.rand(int(N[file_number])) <= prob
+        keep_unfiltered = np.random.rand(int(N[file_number])) <= prob
+        keep = np.logical_and(keep_unfiltered, field_boolean[file_number])
         
         # generate random masses for particles
         log_mass = mass_function.get_random_masses(np.count_nonzero(keep), logMmin, logMmax)
         
         # get pos and vel of random particles
-        data = read_asdf(file_name, load_pos=True, load_vel=True)
-        pos = data["pos"][keep] + box_size/2.
-        vel = data["vel"][keep]
+        #data = read_asdf(file_name, load_pos=True, load_vel=True)
+        data = sw.load(file_name)
+        pos = np.array(data.dark_matter.coordinates[keep])# + L/2
+        vel = np.array(data.dark_matter.velocities[keep])
         
         del data
         gc.collect() # need to run garbage collection to release memory
@@ -169,16 +180,25 @@ if __name__ == "__main__":
     sw_data = sw.load("/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_snapshot_77.hdf5")
     print("WARNING: Using incorrect path for loading redshift")
     redshift=sw_data.metadata.redshift
+    param_file_path = "/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_params.yml"
+    print("WARNING: Using incorrect path in loading cosmology")
+
+    with open(param_file_path, "r") as file:
+        run_params = yaml.safe_load(file)
+
+    group_id_default = run_params["FOF"]["group_id_default"]
     
     # masses of unressolved haloes to add
+    # In AbacusSummit, halos are resolved down to 10^11; for making mocks, they need halos down to 10^10.3 for making BGS stuff
     logMmin = 10.3
     logMmax = 11
+    print("WARNING: Using wrong upper mass bound for unresolved halos")
     
     # get halo mass function
     mass_function = get_mass_function(redshift=redshift, L=L, N=N, simulation=simulation)
     
     # make file of central tracers, using particles, assigning random masses from mass function
-    # this function automatically loops through all 34 files
-    #make_snapshot_tracers_unresolved(output_file, mass_function, logMmin, logMmax, redshift=redshift, L=L, N=N, simulation=simulation)
+    # this function automatically loops through all files
+    make_snapshot_tracers_unresolved(output_file, mass_function, logMmin, logMmax, redshift=redshift, L=L, N=N, simulation=simulation, group_id_default=group_id_default)
     print("WARNING: Not creating any unresolved tracers")
   
