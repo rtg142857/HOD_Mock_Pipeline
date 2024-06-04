@@ -135,7 +135,7 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, logMmin, logMma
         print(file_name)
         
         # choose random particles to keep, based on probability
-        keep_unfiltered = np.random.rand(int(N[file_number])) <= prob
+        keep_unfiltered = np.random.rand(int(field_boolean[file_number].shape[0])) <= prob
         keep = np.logical_and(keep_unfiltered, field_boolean[file_number])
         
         # generate random masses for particles
