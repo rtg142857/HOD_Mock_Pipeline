@@ -38,8 +38,8 @@ def get_mass_function(L, N, simulation, redshift):
         #input_file = file_name%(redshift, file_number)
 
         halo_cat = h5py.File(input_file, "r")
-        m_par = halo_cat["SO"]["DarkMatterMass"][0] / halo_cat["SO"]["NumberOfDarkMatterParticles"][0]
-        log_mass[file_number] = np.log10(np.array(halo_cat["SO"]["DarkMatterMass"]))
+        m_par = halo_cat["SO"]["200_mean"]["DarkMatterMass"][0] / halo_cat["SO"]["200_mean"]["NumberOfDarkMatterParticles"][0]
+        log_mass[file_number] = np.log10(np.array(halo_cat["SO"]["200_mean"]["DarkMatterMass"]))
 
         #halo_cat = CompaSOHaloCatalog(input_file, cleaned=True, fields=['N'])
         #m_par = halo_cat.header["ParticleMassHMsun"]
@@ -200,5 +200,5 @@ if __name__ == "__main__":
     # make file of central tracers, using particles, assigning random masses from mass function
     # this function automatically loops through all files
     make_snapshot_tracers_unresolved(output_file, mass_function, logMmin, logMmax, redshift=redshift, L=L, N=N, simulation=simulation, group_id_default=group_id_default)
-    print("WARNING: Not creating any unresolved tracers")
+    #print("WARNING: Not creating any unresolved tracers")
   
