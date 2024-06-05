@@ -32,9 +32,9 @@ def get_mass_function(L, N, simulation, redshift):
     input_file = "/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_soap.hdf5"
     print("WARNING: Using incorrect path for making unresolved snapshot tracer halo mass function")
 
-    # loop through all 34 files, reading in halo masses
-    log_mass = [None]*34
-    for file_number in range(34):
+    # loop through all 34 files (currently just set to 1), reading in halo masses
+    log_mass = [None]*1
+    for file_number in range(1):
         #input_file = file_name%(redshift, file_number)
 
         halo_cat = h5py.File(input_file, "r")
@@ -128,14 +128,16 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, logMmin, logMma
     # probability to keep a particle
     prob = Nrand*1.0 / Npar
     
-    for file_number in range(34):
+    for file_number in range(1):
         #file_name = path+"z%.3f/field_rv_A/field_rv_A_%03d.asdf"%(redshift, file_number)
         file_name = "/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_snapshot_77.hdf5"
         print("WARNING: Using incorrect path for making unresolved snapshot tracers")
         print(file_name)
         
         # choose random particles to keep, based on probability
+        #print(field_boolean[file_number].shape[0])
         keep_unfiltered = np.random.rand(int(field_boolean[file_number].shape[0])) <= prob
+        #print(keep_unfiltered.shape[0])
         keep = np.logical_and(keep_unfiltered, field_boolean[file_number])
         
         # generate random masses for particles
