@@ -1,9 +1,11 @@
 #! /usr/bin/env python
 import numpy as np
 import h5py
+import yaml
 from scipy.interpolate import interp1d
 from scipy.stats import skewnorm
 from catalogue import Catalogue
+from cosmology import CosmologyFlamingo
 #from abacusnbody.data.compaso_halo_catalog import CompaSOHaloCatalog
 
 
@@ -130,16 +132,19 @@ class FlamingoSnapshot(HaloCatalogue):
     Flamingo halo catalogue from simulation snapshot
 
     Args:
-        file_name: The path to the hdf5 file containing the halos
-        snapshot_redshift: The redshift of the snapshot
-        cosmology: Cosmology object (see cosmology.py)
-        L: Box length (the 100 in L100N180)
-        particles: use particles if True, NFW if False. Default is False; TRUE IS NOT YET SUPPORTED
+        file_name: The path to the hdf5 file containing the halos, SOAP-style
+        path_config_filename: The path to the path_config file saying the path to everything
     """
-    def __init__(self, file_name, snapshot_redshift, cosmology, L,
-                 particles=False):
-        self.cosmology = cosmology
+    def __init__(self, file_name, path_config_filename):
+        self.cosmology = CosmologyFlamingo(path_config_filename)
+
+        with open(path_config_filename, "r") as file:
+            path_config = yaml.safe_load(file)
+
+        L = path_config["Params"]["L"]
         self.box_size = L
+        snapshot_redshift = path_config["Params"]["redshift"]
+        particles = path_config["Params"]["particles"]
 
         # read SOAP halo catalogue file
 

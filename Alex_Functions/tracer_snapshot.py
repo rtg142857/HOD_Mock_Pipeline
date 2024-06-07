@@ -5,23 +5,18 @@ from halo_catalogue import FlamingoSnapshot
 from galaxy_catalogue import GalaxyCatalogueSnapshot
 from cosmology import CosmologyFlamingo
 from hod_tracer import HOD_Tracer
-import swiftsimio as sw
+import yaml
+import sys
+import os
 
-
-def make_snapshot_tracers(output_file,
-                          L, N, simulation,
-                          particles=False, redshift=0.2, ntracer=3, log_mass_min=11):
+def make_snapshot_tracers(input_file, output_file,
+                          path_config_filename):
     """
     Make file of galaxy tracers for a Flamingo simulation snapshot
     Args:
+        input_file: Path of SOAP-style file in which we find halos
         output_file: path of hdf5 file to save output
-        L:           Box length of the simulation (the 350 in e.g. L350N1800_DMO)
-        N:           Number of particles in the simulation (the 1800 in e.g. L350N1800_DMO)
-        simulation:  Specific version of the simulation (e.g. "DMO_FIDUCIAL", "HYDRO_STRONG_AGN")
-        particles:   use particles if True, NFW if False. Default is False; TRUE NOT YET SUPPORTED WITH FLAMINGO
-        redshift:    snapshot redshift. Default z=0.2
-        ntracer:     number of satellite tracers per halo. Default is 3
-        log_mass_min: smallest halo mass to use. Default is logM = 11 Mpc/h
+        path_config_filename: The path to the path_config file saying the path to everything
 
     Old args used in the Abacus mocks:
         file_number: snapshot file number (from 0 to 33)
@@ -33,20 +28,24 @@ def make_snapshot_tracers(output_file,
         B:           if particles=True, use B particles? Default is False
         abacus_cosmologies_file: file of Abacus cosmological parameters
         clean:       use cleaned Abacus halo catalogue? Default is True
+        particles: use particles if True, NFW if False
     """
     #path = "/global/cfs/cdirs/desi/cosmosim/Abacus/AbacusSummit_%s_c%03d_ph%03d/halos/"%(simulation, cosmo, ph)
     #file_name = path+"z%.3f/halo_info/halo_info_%03d.asdf"%(redshift, file_number)
-    simulation_path = "/cosma8/data/dp004/flamingo/Runs/L%03dN%03d/"%(L, N) + simulation
-    file_name = "/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_soap.hdf5"
-    print("WARNING: Using incorrect path for making resolved snapshot tracers")
-    
-    print(simulation_path)
+    #simulation_path = "/cosma8/data/dp004/flamingo/Runs/L%03dN%03d/"%(L, N) + simulation
+    #file_name = "/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_soap.hdf5"
+    print(input_file)
 
-    cosmology = CosmologyFlamingo(L, N, simulation)
+    with open(path_config_filename, "r") as file:
+        path_config = yaml.safe_load(file)
+    log_mass_min = path_config["Params"]["log_mass_min"]
+    L = path_config["Params"]["L"]
+    ntracer = path_config["Params"]["ntracer"]
+
+    cosmology = CosmologyFlamingo(path_config_filename=path_config_filename)
     
     # read in the halo catalogue
-    halo_cat = FlamingoSnapshot(file_name, snapshot_redshift=redshift, cosmology=cosmology, 
-                              L=L, particles=particles)
+    halo_cat = FlamingoSnapshot(input_file, path_config_filename=path_config_filename)
     
     # cut to haloes above minimum mass
     halo_cat.cut(halo_cat.get("mass") >= 10**log_mass_min)
@@ -138,27 +137,27 @@ def add_missing_particles(output_file, box_size=2000):
     
     
 if __name__ == "__main__":
+    path_config_filename = sys.argv[1] # Config file path
 
-    path = "tracer_output" #path to save the output files
-    output_file = path+"galaxy_tracers_0.hdf5"
-    
-    # use cleaned halo catalogue
-    clean=True
+    with open(path_config_filename, "r") as file:
+        path_config = yaml.safe_load(file)
+
+    soap_path = path_config["Paths"]["soap_path"]
+    #photsys = path_config["photsys"]
+    #mag_faint = path_config["mag_faint"]
+    #redshift = path_config["redshift"]
+    #L = path_config["L"]
+    #N = path_config["N"]
+    #log_mass_min = path_config["log_mass_min"]
     
     # number of satellite tracers for each halo
-    ntracer = 3
-    
-    # base L0100N0180 DMO_FIDUCIAL simultion snapshot
-    simulation = "DMO_FIDUCIAL"
-    L = 100
-    N = 180
+    #ntracer = 3
 
     #sw_data = sw.load("/cosma8/data/dp004/flamingo/Runs/L%03dN%03d/"%(L, N) + simulation)
-    sw_data = sw.load("/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_snapshot_77.hdf5")
-    print("WARNING: Using incorrect path for loading redshift")
-    redshift=sw_data.metadata.redshift
+    #sw_data = sw.load("/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_snapshot_77.hdf5")
+    #print("WARNING: Using incorrect path for loading redshift")
+    #redshift=sw_data.metadata.redshift
 
-    log_mass_min = 11
     #simulation = "base"
     #cosmo = 0
     #ph = 0
@@ -167,19 +166,16 @@ if __name__ == "__main__":
     #abacus_cosmologies_file = "abacus_cosmologies.csv"
     
     # for NFW profile
-    particles=False
-    A = False # doesn't matter what A and B are set to, since particles are not being used
-    B = False
+    #particles=False
+
+    path = "tracer_output" #path to save the output files
+    output_file = path+"galaxy_tracers_0.hdf5"
     
-    # for using A particles
-    #particles = True
-    #A = True
-    #B = False
-    
-    # loop through the 34 snapshot files, adding tracers, and saving the output to a file
-    #for i in range(34):
-    make_snapshot_tracers(output_file, L=L, N=N, simulation=simulation,
-                              particles=False, redshift=redshift,
-                              ntracer=ntracer, log_mass_min=log_mass_min)
+    # location of the snapshots
+    soap_files_list = os.listdir(soap_path)
+    # loop through the SOAP files, adding tracers, and saving the output to a file
+    for file_name in soap_files_list:
+        make_snapshot_tracers(soap_path+file_name, output_file,
+                              path_config_filename=path_config_filename)
         
         # add_missing_particles(output_file%i, box_size=box_size)
