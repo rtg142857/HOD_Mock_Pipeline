@@ -1,8 +1,9 @@
 #!/bin/bash -l
 
-L=1000
-N=1800
-simulation="DMO_FIDUCIAL"
+# L=1000
+# N=1800
+# simulation="DMO_FIDUCIAL"
+path_config="/cosma7/data/dp004/dc-mene1/HOD_Mock_Pipeline/path_config.yml"
 
 mkdir "halo_fitting_L${L}N${N}_${simulation}"
 
@@ -19,21 +20,14 @@ cp ../batch_hod_fitting2.sh ./
 
 cp ../rescaling_code/ -r ./
 
-sed -i "s/cosmo_number = 0/cosmo_number = ${cosmo_number}/" rescaling_code/xi_rescaling_factor.py
-
-sed -i "s/cosmo_number = 0/cosmo_number = ${cosmo_number}/" rescaling_code/luminosity_function.py
-
-sed -i "s/simulation = \"DMO_FIDUCIAL\"/simulation = \"${simulation}\"/" tracer_snapshot.py
-
-sed -i "s/L = 100/L = ${L}/" tracer_snapshot.py
-
-sed -i "s/N = 180/N = ${N}/" tracer_snapshot.py
-
-sed -i "s/simulation = \"DMO_FIDUCIAL\"/simulation = \"${simulation}\"/" tracer_snapshot_unresolved.py
-
-sed -i "s/L = 100/L = ${L}/" tracer_snapshot_unresolved.py
-
-sed -i "s/N = 180/N = ${N}/" tracer_snapshot_unresolved.py
+# sed -i "s/cosmo_number = 0/cosmo_number = ${cosmo_number}/" rescaling_code/xi_rescaling_factor.py
+# sed -i "s/cosmo_number = 0/cosmo_number = ${cosmo_number}/" rescaling_code/luminosity_function.py
+# sed -i "s/simulation = \"DMO_FIDUCIAL\"/simulation = \"${simulation}\"/" tracer_snapshot.py
+# sed -i "s/L = 100/L = ${L}/" tracer_snapshot.py
+# sed -i "s/N = 180/N = ${N}/" tracer_snapshot.py
+# sed -i "s/simulation = \"DMO_FIDUCIAL\"/simulation = \"${simulation}\"/" tracer_snapshot_unresolved.py
+# sed -i "s/L = 100/L = ${L}/" tracer_snapshot_unresolved.py
+# sed -i "s/N = 180/N = ${N}/" tracer_snapshot_unresolved.py
 
 #conda activate halo_env
 #source /global/common/software/desi/users/adematti/cosmodesi_environment.sh main
@@ -52,5 +46,5 @@ git clone --depth 1 "https://github.com/amjsmith/shared_code/"
 #cp target_num_den_rescaled.txt FastHodFitting/fitting_smoothed_curves_nersc/target_num_den_rescaled.txt
 #cp -r ../FastHodFitting/ ./
 
-jid1=$(sbatch --parsable batch_hod_fitting.sh)
+jid1=$(sbatch --parsable batch_hod_fitting.sh $path_config)
 jid2=$(sbatch  --dependency=afterany:$jid1 --parsable batch_hod_fitting2.sh)
