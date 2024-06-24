@@ -168,15 +168,21 @@ if __name__ == "__main__":
     # for NFW profile
     #particles=False
 
-    path = "tracer_output" #path to save the output files
+    path = "tracer_output/" #path to save the output files
     
-    # location of the snapshots
-    soap_files_list = os.listdir(soap_path)
-    # loop through the SOAP files, adding tracers, and saving the output to a file
-    for file_number, file_name in enumerate(soap_files_list):
-        output_file = path+"galaxy_tracers_"+str(file_number)+".hdf5"
-
-        make_snapshot_tracers(soap_path+file_name, output_file,
+    if soap_path[-5:] == ".hdf5": # if the soap path is a single file
+        output_file = path+"galaxy_tracers_0.hdf5"
+        make_snapshot_tracers(soap_path, output_file,
                               path_config_filename=path_config_filename)
-        
-        # add_missing_particles(output_file%i, box_size=box_size)
+    else:
+
+        # location of the snapshots
+        soap_files_list = os.listdir(soap_path)
+        # loop through the SOAP files, adding tracers, and saving the output to a file
+        for file_number, file_name in enumerate(soap_files_list):
+            output_file = path+"galaxy_tracers_"+str(file_number)+".hdf5"
+
+            make_snapshot_tracers(soap_path+file_name, output_file,
+                                path_config_filename=path_config_filename)
+            
+            # add_missing_particles(output_file%i, box_size=box_size)

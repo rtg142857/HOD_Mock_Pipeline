@@ -5,10 +5,10 @@ import gc
 import swiftsimio as sw
 from mass_function import MassFunction
 from cosmology import CosmologyFlamingo
+from read_hdf5 import read_soap_log_mass
 import yaml
 import sys
 import os
-
 
 def get_mass_function(path_config_filename):
     """
@@ -36,27 +36,36 @@ def get_mass_function(path_config_filename):
     #input_file = "/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_soap.hdf5"
     #print("WARNING: Using incorrect path for making unresolved snapshot tracer halo mass function")
 
+    if soap_path[-5:] == ".hdf5": # if the soap path is a single file
+
+        for file_name in soap_files_list:
+
+            input_file = soap_path
+            log_mass = read_soap_log_mass(input_file)
+            
+            print(len(log_mass[file_number]))
+
+    else: # if it's a directory
     # location of the snapshots
-    soap_files_list = os.listdir(soap_path)
+        soap_files_list = os.listdir(soap_path)
 
-    # loop through all files, reading in halo masses
-    log_mass = [None]*len(soap_files_list)
-    for file_name in soap_files_list:
-        #input_file = file_name%(redshift, file_number)
-        file_number = int(file_name.split(".")[1])
-        input_file = soap_path + file_name
+        # loop through all files, reading in halo masses
+        log_mass = [None]*len(soap_files_list)
+        for file_name in soap_files_list:
+            #input_file = file_name%(redshift, file_number)
+            file_number = int(file_name.split(".")[1])
+            input_file = soap_path + file_name
 
-        halo_cat = h5py.File(input_file, "r")
-        #m_par = halo_cat["SO"]["200_mean"]["DarkMatterMass"][0] / halo_cat["SO"]["200_mean"]["NumberOfDarkMatterParticles"][0]
-        log_mass[file_number] = np.log10(np.array(halo_cat["SO"]["200_mean"]["DarkMatterMass"]))
+            input_file = soap_path
+            log_mass = read_soap_log_mass(input_file)
 
-        #halo_cat = CompaSOHaloCatalog(input_file, cleaned=True, fields=['N'])
-        #m_par = halo_cat.header["ParticleMassHMsun"]
-        #log_mass[file_number] = np.log10(np.array(halo_cat.halos["N"])*m_par)
-        
-        print(file_number, len(log_mass[file_number]))
+            #halo_cat = CompaSOHaloCatalog(input_file, cleaned=True, fields=['N'])
+            #m_par = halo_cat.header["ParticleMassHMsun"]
+            #log_mass[file_number] = np.log10(np.array(halo_cat.halos["N"])*m_par)
+            
+            print(file_number, len(log_mass[file_number]))
 
-    log_mass = np.concatenate(log_mass)
+        log_mass = np.concatenate(log_mass)
 
     # get number densities in mass bins  
     bin_size = 0.02
