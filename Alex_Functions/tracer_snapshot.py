@@ -169,12 +169,13 @@ if __name__ == "__main__":
     #particles=False
 
     path = "tracer_output" #path to save the output files
-    output_file = path+"galaxy_tracers_0.hdf5"
     
     # location of the snapshots
     soap_files_list = os.listdir(soap_path)
     # loop through the SOAP files, adding tracers, and saving the output to a file
-    for file_name in soap_files_list:
+    for file_number, file_name in enumerate(soap_files_list):
+        output_file = path+"galaxy_tracers_"+file_number+".hdf5"
+        
         make_snapshot_tracers(soap_path+file_name, output_file,
                               path_config_filename=path_config_filename)
         

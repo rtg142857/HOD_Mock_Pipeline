@@ -25,8 +25,8 @@ def get_mass_function(path_config_filename):
     """
     with open(path_config_filename, "r") as file:
         path_config = yaml.safe_load(file)
-    soap_path = path_config["Params"]["soap_path"]
-    redshift = path_config["Params"]["redshift"]
+    soap_path = path_config["Paths"]["soap_path"]
+    redshift = path_config["Paths"]["redshift"]
     L = path_config["Params"]["L"]
 
     #path = "/global/cfs/cdirs/desi/cosmosim/Abacus/AbacusSummit_%s_c%03d_ph%03d/halos/"%(simulation, cosmo, ph)
