@@ -4,7 +4,7 @@
 # N=1800
 # simulation="DMO_FIDUCIAL"
 label=L1000N1800_DMO_FIDUCIAL
-path_config="/cosma7/data/dp004/dc-mene1/HOD_Mock_Pipeline/path_config.yml"
+path_config="/cosma8/data/dp004/dc-mene1/HOD_Mock_Pipeline/path_config.yml"
 
 mkdir "halo_fitting_${label}"
 
