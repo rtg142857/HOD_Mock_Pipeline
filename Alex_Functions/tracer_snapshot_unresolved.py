@@ -43,7 +43,7 @@ def get_mass_function(path_config_filename):
     log_mass = [None]*len(soap_files_list)
     for file_name in soap_files_list:
         #input_file = file_name%(redshift, file_number)
-        file_number = file_name.split(".")[1]
+        file_number = int(file_name.split(".")[1])
         input_file = soap_path + file_name
 
         halo_cat = h5py.File(input_file, "r")
