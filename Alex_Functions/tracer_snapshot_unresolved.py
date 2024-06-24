@@ -38,12 +38,10 @@ def get_mass_function(path_config_filename):
 
     if soap_path[-5:] == ".hdf5": # if the soap path is a single file
 
-        for file_name in soap_files_list:
-
-            input_file = soap_path
-            log_mass = read_soap_log_mass(input_file)
-            
-            print(len(log_mass[file_number]))
+        input_file = soap_path
+        log_mass = read_soap_log_mass(input_file)
+        
+        print(len(log_mass[file_number]))
 
     else: # if it's a directory
     # location of the snapshots
