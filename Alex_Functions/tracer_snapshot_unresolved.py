@@ -127,7 +127,7 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
     N_particles_in_file = np.zeros(len(snapshot_files_list), dtype="i")
     field_boolean = np.empty(len(snapshot_files_list), dtype=np.ndarray)
     for file_name in snapshot_files_list:
-        file_number = file_name.split(".")[1]
+        file_number = int(file_name.split(".")[1])
         file_path = snapshot_path + file_name
         # this loop is slow. Is there a faster way to get total number of field particles in each file?
         #file_name = path+"z%.3f/field_rv_A/field_rv_A_%03d.asdf"%(redshift, file_number)
