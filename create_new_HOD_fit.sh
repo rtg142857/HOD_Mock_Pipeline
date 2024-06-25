@@ -18,7 +18,7 @@ cp ../Alex_Functions/*.csv ./
 cp ../Alex_Functions/*.dat ./
 cp ../Alex_Functions/*.sh ./
 cp ../batch_hod_fitting.sh ./
-cp ../batch_hod_fitting2.sh ./
+# cp ../batch_hod_fitting2.sh ./
 
 cp ../rescaling_code/ -r ./
 
@@ -49,4 +49,6 @@ git clone --depth 1 "https://github.com/amjsmith/shared_code/"
 #cp -r ../FastHodFitting/ ./
 
 jid1=$(sbatch --parsable batch_hod_fitting.sh $path_config)
-jid2=$(sbatch  --dependency=afterany:$jid1 --parsable batch_hod_fitting2.sh)
+cd FastHodFitting/paircounting
+cp ../../../batch_hod_fitting2.sh ./
+jid2=$(sbatch  --dependency=afterany:$jid1 --parsable batch_hod_fitting2.sh $path_config)
