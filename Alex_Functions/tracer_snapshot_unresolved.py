@@ -41,7 +41,7 @@ def get_mass_function(path_config_filename):
         input_file = soap_path
         log_mass = read_soap_log_mass(input_file)
         
-        print(len(log_mass[file_number]))
+        print("Read log mass from file")
 
     else: # if it's a directory
     # location of the snapshots
@@ -64,6 +64,7 @@ def get_mass_function(path_config_filename):
             print(file_number, len(log_mass[file_number]))
 
         log_mass = np.concatenate(log_mass)
+        print("Read log mass from files")
 
     # get number densities in mass bins  
     bin_size = 0.02
