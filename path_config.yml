@@ -6,7 +6,7 @@
 
 Paths:
   soap_path: /cosma8/data/dp004/flamingo/Runs/L1000N1800/DMO_FIDUCIAL/SOAP/halo_properties_0077.hdf5
-  snapshot_path: /cosma8/data/dp004/flamingo/Runs/L1000N1800/DMO_FIDUCIAL/snapshots/flamingo_0077/ # should be a single file
+  snapshot_path: /cosma8/data/dp004/flamingo/Runs/L1000N1800/DMO_FIDUCIAL/snapshots/flamingo_0077/flamingo_0077.hdf5 # should be a single file
   lightcone_path: /cosma8/data/dp004/flamingo/Runs/L1000N1800/DMO_FIDUCIAL/lightcones/lightcone0_particles/
   params_path: /cosma8/data/dp004/flamingo/Runs/L1000N1800/DMO_FIDUCIAL/used_parameters.yml
 
