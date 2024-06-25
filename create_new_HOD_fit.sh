@@ -40,7 +40,7 @@ module load cosmodesiconda/my-desiconda
 
 #python rescaling_code/luminosity_function.py
 
-git clone --depth 1 "https://github.com/amjsmith/FastHodFitting"
+git clone --depth 1 "https://github.com/rtg142857/FastHodFitting"
 
 git clone --depth 1 "https://github.com/amjsmith/shared_code/"
 
