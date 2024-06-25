@@ -195,7 +195,7 @@ if __name__ == "__main__":
 
     soap_path = path_config["Paths"]["soap_path"]
     
-    output_path = "tracer_output" #path to save the output files
+    output_path = "tracer_output/" #path to save the output files
     output_file = output_path+"galaxy_tracers_unresolved_%i.hdf5"
     
     # use cleaned halo catalogue mass function

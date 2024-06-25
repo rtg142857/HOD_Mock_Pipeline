@@ -11,6 +11,7 @@ mkdir "halo_fitting_${label}"
 cd "halo_fitting_${label}"
 
 mkdir logs
+mkdir tracer_output
 
 cp ../Alex_Functions/*.py ./
 cp ../Alex_Functions/*.csv ./
