@@ -5,7 +5,7 @@ import gc
 import swiftsimio as sw
 from mass_function import MassFunction
 from cosmology import CosmologyFlamingo
-from read_hdf5 import read_soap_log_mass
+from read_hdf5 import read_soap_log_mass, find_field_particles_snapshot_file
 import yaml
 import sys
 import os
@@ -123,67 +123,96 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
     
     # get total number of field particles (formerly using A particles)
     snapshot_path = path_config["Paths"]["snapshot_path"]
-    snapshot_files_list = os.listdir(snapshot_path)
-    N_particles_in_file = np.zeros(len(snapshot_files_list), dtype="i")
-    field_boolean = np.empty(len(snapshot_files_list), dtype=np.ndarray)
-    for file_name in snapshot_files_list:
-        file_number = int(file_name.split(".")[1])
-        file_path = snapshot_path + file_name
-        # this loop is slow. Is there a faster way to get total number of field particles in each file?
-        #file_name = path+"z%.3f/field_rv_A/field_rv_A_%03d.asdf"%(redshift, file_number)
-        #file_name = "/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_snapshot_77.hdf5"
 
-        #file = h5py.File(file_name, "r")
-        #data = read_asdf(file_name, load_pos=True, load_vel=False)
-        #p = data["pos"]
+    print("Counting field particles")
+    field_boolean = find_field_particles_snapshot_file(snapshot_path, group_id_default)
+    Npar = field_boolean.sum()
+    gc.collect() # need to run garbage collection to release memory
 
-        data = sw.load(file_path)
-        p = (data.dark_matter.fofgroup_ids == group_id_default)
-        del data
-        field_boolean[file_number] = p
-        N_particles_in_file[file_number] = p.sum()
-        gc.collect() # need to run garbage collection to release memory
-        
-    ##################the above should be looped over all files with the right snapshot
+    # snapshot_files_list = os.listdir(snapshot_path)
+    # N_particles_in_file = np.zeros(len(snapshot_files_list), dtype="i")
+    # field_boolean = np.empty(len(snapshot_files_list), dtype=np.ndarray)
+    # for file_name in snapshot_files_list:
+    #     file_number = int(file_name.split(".")[1])
+    #     file_path = snapshot_path + file_name
+    #     # this loop is slow. Is there a faster way to get total number of field particles in each file?
+    #     #file_name = path+"z%.3f/field_rv_A/field_rv_A_%03d.asdf"%(redshift, file_number)
+    #     #file_name = "/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_snapshot_77.hdf5"
+
+    #     #file = h5py.File(file_name, "r")
+    #     #data = read_asdf(file_name, load_pos=True, load_vel=False)
+    #     #p = data["pos"]
+
+    #     data = sw.load(file_path)
+    #     p = (data.dark_matter.fofgroup_ids == group_id_default)
+    #     del data
+    #     field_boolean[file_number] = p
+    #     N_particles_in_file[file_number] = p.sum()
+    #     gc.collect() # need to run garbage collection to release memory
 
     # total number of field particles in full snapshot
-    Npar = np.sum(N_particles_in_file)
+    #Npar = np.sum(N_particles_in_file)
     
     # probability to keep a particle
     prob = Nrand*1.0 / Npar
     
-    for file_name in snapshot_files_list:
-        file_number = file_name.split(".")[1]
-        file_path = snapshot_path + file_name
-        #file_name = path+"z%.3f/field_rv_A/field_rv_A_%03d.asdf"%(redshift, file_number)
-        #file_name = "/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_snapshot_77.hdf5"
-        #print("WARNING: Using incorrect path for making unresolved snapshot tracers")
-        print(file_name)
-        
-        # choose random particles to keep, based on probability
-        #print(field_boolean[file_number].shape[0])
-        keep_unfiltered = np.random.rand(int(field_boolean[file_number].shape[0])) <= prob
-        #print(keep_unfiltered.shape[0])
-        keep = np.logical_and(keep_unfiltered, field_boolean[file_number])
-        
-        # generate random masses for particles
-        log_mass = mass_function.get_random_masses(np.count_nonzero(keep), logMmin, logMmax)
-        
-        # get pos and vel of random particles
-        #data = read_asdf(file_name, load_pos=True, load_vel=True)
-        data = sw.load(file_path)
-        pos = np.array(data.dark_matter.coordinates[keep])# + L/2
-        vel = np.array(data.dark_matter.velocities[keep])
-        
-        del data
-        gc.collect() # need to run garbage collection to release memory
+    print("Choosing random particles to keep")
     
-        # save to file, converting masses to units 1e10 Msun/h
-        f = h5py.File(output_file%file_number, "a")
-        f.create_dataset("mass",     data=10**(log_mass-10), compression="gzip")
-        f.create_dataset("position", data=pos, compression="gzip")
-        f.create_dataset("velocity", data=vel, compression="gzip")
-        f.close()
+    # choose random particles to keep, based on probability
+    keep_unfiltered = np.random.rand(int(field_boolean.shape[0])) <= prob
+    keep = np.logical_and(keep_unfiltered, field_boolean)
+    
+    # generate random masses for particles
+    log_mass = mass_function.get_random_masses(np.count_nonzero(keep), logMmin, logMmax)
+    
+    # get pos and vel of random particles
+    #data = read_asdf(file_name, load_pos=True, load_vel=True)
+    data = sw.load(snapshot_path)
+    pos = np.array(data.dark_matter.coordinates[keep])# + L/2
+    vel = np.array(data.dark_matter.velocities[keep])
+    
+    del data
+    gc.collect() # need to run garbage collection to release memory
+
+    # save to file, converting masses to units 1e10 Msun/h
+    f = h5py.File(output_file%0, "a")
+    f.create_dataset("mass",     data=10**(log_mass-10), compression="gzip")
+    f.create_dataset("position", data=pos, compression="gzip")
+    f.create_dataset("velocity", data=vel, compression="gzip")
+    f.close()
+
+    # for file_name in snapshot_files_list:
+    #     file_number = file_name.split(".")[1]
+    #     file_path = snapshot_path + file_name
+    #     #file_name = path+"z%.3f/field_rv_A/field_rv_A_%03d.asdf"%(redshift, file_number)
+    #     #file_name = "/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_snapshot_77.hdf5"
+    #     #print("WARNING: Using incorrect path for making unresolved snapshot tracers")
+    #     print(file_name)
+        
+    #     # choose random particles to keep, based on probability
+    #     #print(field_boolean[file_number].shape[0])
+    #     keep_unfiltered = np.random.rand(int(field_boolean[file_number].shape[0])) <= prob
+    #     #print(keep_unfiltered.shape[0])
+    #     keep = np.logical_and(keep_unfiltered, field_boolean[file_number])
+        
+    #     # generate random masses for particles
+    #     log_mass = mass_function.get_random_masses(np.count_nonzero(keep), logMmin, logMmax)
+        
+    #     # get pos and vel of random particles
+    #     #data = read_asdf(file_name, load_pos=True, load_vel=True)
+    #     data = sw.load(file_path)
+    #     pos = np.array(data.dark_matter.coordinates[keep])# + L/2
+    #     vel = np.array(data.dark_matter.velocities[keep])
+        
+    #     del data
+    #     gc.collect() # need to run garbage collection to release memory
+    
+    #     # save to file, converting masses to units 1e10 Msun/h
+    #     f = h5py.File(output_file%file_number, "a")
+    #     f.create_dataset("mass",     data=10**(log_mass-10), compression="gzip")
+    #     f.create_dataset("position", data=pos, compression="gzip")
+    #     f.create_dataset("velocity", data=vel, compression="gzip")
+    #     f.close()
         
         
         
