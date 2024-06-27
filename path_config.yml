@@ -23,3 +23,6 @@ Params:
   logMmax: 11 # Maximum mass of unresolved halo tracers; SHOULD BE CHANGED FOR FLAMINGO
   ntracer: 3 # Number of satellite tracers for each halo
   particles: False # use particles to position galaxy tracers if True, NFW if False; True not yet supported with Flamingo
+
+Misc:
+  random_seed: 1
