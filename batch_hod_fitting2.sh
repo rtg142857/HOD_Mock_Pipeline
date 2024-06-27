@@ -1,5 +1,7 @@
 #!/bin/bash -l
 
+# First argument is the path to the path_config.yml file
+
 #SBATCH --ntasks 1 # The number of cores you need...
 #SBATCH -J paircounting #Give it something meaningful.
 #SBATCH -o logs/tracer_snap2
@@ -24,7 +26,7 @@ module load cosmodesiconda/my-desiconda
 module load python/3.10.12
 
 # Only do the halo paircounting in this step
-python cencen.py
-python censat.py
-python satsat.py
-python satsat_onehalo.py
+python cencen.py $1
+python censat.py $1
+python satsat.py $1
+python satsat_onehalo.py $1
