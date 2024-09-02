@@ -3,7 +3,7 @@
 # L=1000
 # N=1800
 # simulation="DMO_FIDUCIAL"
-label=L1000N1800_DMO_FIDUCIAL
+label=L1000N1800_HYDRO
 path_config="/cosma8/data/dp004/dc-mene1/HOD_Mock_Pipeline/path_config.yml"
 
 mkdir "halo_fitting_${label}"
@@ -33,14 +33,15 @@ cp ../rescaling_code/ -r ./
 
 #conda activate halo_env
 #source /global/common/software/desi/users/adematti/cosmodesi_environment.sh main
-module use /cosma/home/dp004/dc-mene1/software/desi/cosmodesiconda/my-desiconda/modulefiles
-module load cosmodesiconda/my-desiconda
+#module use /cosma/home/dp004/dc-mene1/software/desi/cosmodesiconda/my-desiconda/modulefiles
+#module load cosmodesiconda/my-desiconda
+source /cosma/home/dp004/dc-mene1/activate-cosmodesiconda
 
 #python rescaling_code/xi_rescaling_factor.py
 
 #python rescaling_code/luminosity_function.py
 
-git clone --depth 1 "https://github.com/rtg142857/FastHodFitting"
+git clone -b flamingo --depth 1 "https://github.com/rtg142857/FastHodFitting"
 
 git clone --depth 1 "https://github.com/amjsmith/shared_code/"
 
