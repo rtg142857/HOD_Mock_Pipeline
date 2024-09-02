@@ -24,7 +24,7 @@ source /cosma/home/dp004/dc-mene1/activate-cosmodesiconda
 #module load gsl
 #module unload craype-hugepages2M
 
-module load python/3.10.12
+#module load python/3.10.12
 
 # Only do the halo paircounting in this step
 python cencen.py $1

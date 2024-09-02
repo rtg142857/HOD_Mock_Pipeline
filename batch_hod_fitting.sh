@@ -24,7 +24,7 @@ source /cosma/home/dp004/dc-mene1/activate-cosmodesiconda
 #module load gsl
 #module unload craype-hugepages2M
 
-module load python/3.10.12
+#module load python/3.10.12
 
 python tracer_snapshot.py $1
 python tracer_snapshot_unresolved.py $1
