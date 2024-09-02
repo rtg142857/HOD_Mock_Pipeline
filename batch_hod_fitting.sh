@@ -16,8 +16,9 @@
 module purge
 #cosmodesienv main
 #conda activate abacus-env
-module use /cosma/home/dp004/dc-mene1/software/desi/cosmodesiconda/my-desiconda/modulefiles
-module load cosmodesiconda/my-desiconda
+#module use /cosma/home/dp004/dc-mene1/software/desi/cosmodesiconda/my-desiconda/modulefiles
+#module load cosmodesiconda/my-desiconda
+source /cosma/home/dp004/dc-mene1/activate-cosmodesiconda
 
 #module load gcc
 #module load gsl
