@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 import numpy as np
-from scipy.integrate import simps, quad
+from scipy.integrate import simpson, quad
 from scipy.interpolate import splrep, splev
 from scipy.optimize import minimize
 from cosmoprimo import Fourier
@@ -120,7 +120,7 @@ class PowerSpectrum(object):
         sigma = np.zeros(len(logR))
         R = 10**logR
         for i in range(len(R)):
-            sigma[i] = simps(self.__func(self.__k, R[i]), self.__k)
+            sigma[i] = simpson(self.__func(self.__k, R[i]), self.__k)
 
         sigma = sigma / (2 * np.pi**2)
         sigma = np.sqrt(sigma)
