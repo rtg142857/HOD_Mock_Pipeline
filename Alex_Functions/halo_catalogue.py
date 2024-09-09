@@ -175,7 +175,7 @@ class FlamingoSnapshot(HaloCatalogue):
         self._quantities = {
             'pos':   np.array(halo_cat["SO"]["200_mean"]["CentreOfMass"]),
             'vel':   np.array(halo_cat["SO"]["200_mean"]["CentreOfMassVelocity"]),
-            'mass':  np.array(halo_cat["SO"]["200_mean"]["DarkMatterMass"] * UnitMass_in_Msol),
+            'mass':  np.array(halo_cat["SO"]["200_mean"]["DarkMatterMass"]) * UnitMass_in_Msol,
             'rvmax': np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"])
             # TODO: Check if the maximum circ velocity radius can be done via SO
             #'r200': halo_cat["Subhalos"]["BoundR200CritComoving"]
