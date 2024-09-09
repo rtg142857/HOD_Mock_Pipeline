@@ -10,7 +10,7 @@
 #SBATCH -A dp004
 #SBATCH --exclusive
 #SBATCH -t 720
-#SBATCH --mail-type=END # notifications for job done & fail
+#SBATCH --mail-type=ALL # notifications for job done & fail
 #SBATCH --mail-user=tlrt88@durham.ac.uk #PLEASE PUT YOUR EMAIL ADDRESS HERE (without the <>)
 
 module purge
