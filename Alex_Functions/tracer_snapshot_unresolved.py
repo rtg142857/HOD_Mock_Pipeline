@@ -30,7 +30,7 @@ def get_mass_function(path_config_filename):
     L = path_config["Params"]["L"]
     with open(path_config["Paths"]["params_path"], "r") as file:
         used_params = yaml.safe_load(file)
-    UnitMass_in_cgs = used_params["InternalUnitSystem"]["UnitMass_in_cgs"]
+    UnitMass_in_cgs = float(used_params["InternalUnitSystem"]["UnitMass_in_cgs"])
 
     #path = "/global/cfs/cdirs/desi/cosmosim/Abacus/AbacusSummit_%s_c%03d_ph%03d/halos/"%(simulation, cosmo, ph)
     #file_name = path+"z%.3f/halo_info/halo_info_%03d.asdf"
