@@ -146,6 +146,11 @@ class FlamingoSnapshot(HaloCatalogue):
         snapshot_redshift = path_config["Params"]["redshift"]
         particles = path_config["Params"]["particles"]
 
+        with open(path_config["Paths"]["params_path"], "r") as file:
+            used_params = yaml.safe_load(file)
+        UnitMass_in_cgs = float(used_params["InternalUnitSystem"]["UnitMass_in_cgs"])
+        UnitMass_in_Msol = UnitMass_in_cgs / 1.98841e33
+
         # read SOAP halo catalogue file
 
         # self.so_density is not needed MAYBE; double-check
@@ -170,7 +175,7 @@ class FlamingoSnapshot(HaloCatalogue):
         self._quantities = {
             'pos':   np.array(halo_cat["SO"]["200_mean"]["CentreOfMass"]),
             'vel':   np.array(halo_cat["SO"]["200_mean"]["CentreOfMassVelocity"]),
-            'mass':  np.array(halo_cat["SO"]["200_mean"]["DarkMatterMass"]),
+            'mass':  np.array(halo_cat["SO"]["200_mean"]["DarkMatterMass"] * UnitMass_in_Msol),
             'rvmax': np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"])
             # TODO: Check if the maximum circ velocity radius can be done via SO
             #'r200': halo_cat["Subhalos"]["BoundR200CritComoving"]

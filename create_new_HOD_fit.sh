@@ -52,4 +52,6 @@ git clone --depth 1 "https://github.com/amjsmith/shared_code/"
 jid1=$(sbatch --parsable batch_hod_fitting.sh $path_config)
 cd FastHodFitting/paircounting
 cp ../../../batch_hod_fitting2.sh ./
+mkdir logs
 jid2=$(sbatch  --dependency=afterany:$jid1 --parsable batch_hod_fitting2.sh $path_config)
+# then go to FastHodFitting/fitting_smoothed_curves_nersc and do batch_fitting.sh
