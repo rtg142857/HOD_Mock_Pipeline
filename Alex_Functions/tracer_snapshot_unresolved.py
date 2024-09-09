@@ -28,6 +28,9 @@ def get_mass_function(path_config_filename):
     soap_path = path_config["Paths"]["soap_path"]
     redshift = path_config["Params"]["redshift"]
     L = path_config["Params"]["L"]
+    with open(path_config["Paths"]["params_path"], "r") as file:
+        used_params = yaml.safe_load(file)
+    UnitMass_in_cgs = used_params["InternalUnitSystem"]["UnitMass_in_cgs"]
 
     #path = "/global/cfs/cdirs/desi/cosmosim/Abacus/AbacusSummit_%s_c%03d_ph%03d/halos/"%(simulation, cosmo, ph)
     #file_name = path+"z%.3f/halo_info/halo_info_%03d.asdf"
@@ -39,7 +42,7 @@ def get_mass_function(path_config_filename):
     if soap_path[-5:] == ".hdf5": # if the soap path is a single file
 
         input_file = soap_path
-        log_mass = read_soap_log_mass(input_file)
+        log_mass = read_soap_log_mass(input_file, UnitMass_in_cgs)
         
         print("Read log mass from file")
 
@@ -55,7 +58,7 @@ def get_mass_function(path_config_filename):
             input_file = soap_path + file_name
 
             input_file = soap_path
-            log_mass = read_soap_log_mass(input_file)
+            log_mass = read_soap_log_mass(input_file, UnitMass_in_cgs)
 
             #halo_cat = CompaSOHaloCatalog(input_file, cleaned=True, fields=['N'])
             #m_par = halo_cat.header["ParticleMassHMsun"]
