@@ -309,7 +309,7 @@ class CosmologyFlamingo(Cosmology):
             w_a = None
 
         try:
-            M_nu_eV = run_params["Cosmology"]["w_a"]
+            M_nu_eV = run_params["Cosmology"]["M_nu_eV"]
         except:
             M_nu_eV = None
 
