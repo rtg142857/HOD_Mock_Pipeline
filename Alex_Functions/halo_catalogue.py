@@ -132,7 +132,7 @@ class FlamingoSnapshot(HaloCatalogue):
     Flamingo halo catalogue from simulation snapshot
 
     Args:
-        file_name: The path to the hdf5 file containing the halos, SOAP-style
+        file_name: The path to the hdf5 file containing the halos, SOAP-style (or Peregrinus style, if misc/halo_type is "peregrinus")
         path_config_filename: The path to the path_config file saying the path to everything
     """
     def __init__(self, file_name, path_config_filename):
@@ -145,6 +145,11 @@ class FlamingoSnapshot(HaloCatalogue):
         self.box_size = L
         snapshot_redshift = path_config["Params"]["redshift"]
         particles = path_config["Params"]["particles"]
+
+        try:
+            halo_type = path_config["Misc"]["halo_type"]
+        except:
+            halo_type = "soap"
 
         with open(path_config["Paths"]["params_path"], "r") as file:
             used_params = yaml.safe_load(file)
@@ -172,14 +177,24 @@ class FlamingoSnapshot(HaloCatalogue):
         # vel: looking for Center of mass vel of the largest L2 subhalo
         # mass: looking for number of particles in the halo * particle mass
         # rvmax: looking for Radius of max circular velocity, relative to the L2 center, stored as the ratio to r100 condensed to [0,30000]
-        self._quantities = {
-            'pos':   np.array(halo_cat["SO"]["200_mean"]["CentreOfMass"]),
-            'vel':   np.array(halo_cat["SO"]["200_mean"]["CentreOfMassVelocity"]),
-            'mass':  np.array(halo_cat["SO"]["200_mean"]["DarkMatterMass"]) * UnitMass_in_Msol,
-            'rvmax': np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"])
-            # TODO: Check if the maximum circ velocity radius can be done via SO
-            #'r200': halo_cat["Subhalos"]["BoundR200CritComoving"]
-        }
+        if halo_type == "soap":
+            self._quantities = {
+                'pos':   np.array(halo_cat["SO"]["200_mean"]["CentreOfMass"]),
+                'vel':   np.array(halo_cat["SO"]["200_mean"]["CentreOfMassVelocity"]),
+                'mass':  np.array(halo_cat["SO"]["200_mean"]["DarkMatterMass"]) * UnitMass_in_Msol,
+                'rvmax': np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"]) / np.array(halo_cat["SO"]["50_crit"]["SORadius"])
+                # TODO: Check if the maximum circ velocity radius can be done via SO
+                #'r200': halo_cat["Subhalos"]["BoundR200CritComoving"]
+            }
+        elif halo_type == "peregrinus":
+            self._quantities = {
+                'pos':   np.array(halo_cat["Subhalos"]["ComovingAveragePosition"]),
+                'vel':   np.array(halo_cat["Subhalos"]["PhysicalAverageVelocity"]),
+                'mass':  np.array(halo_cat["Subhalos"]["BoundM200Crit"]) * UnitMass_in_Msol,
+                'rvmax': np.array(halo_cat["Subhalos"]["RmaxComoving"]) / np.array(halo_cat["Subhalos"]["REncloseComoving"])
+                # TODO: Check if the maximum circ velocity radius can be done via SO
+                #'r200': halo_cat["Subhalos"]["BoundR200CritComoving"]
+            }
 
         self.size = len(self._quantities['mass'][...])
 

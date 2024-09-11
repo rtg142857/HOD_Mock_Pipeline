@@ -5,7 +5,7 @@ import gc
 import swiftsimio as sw
 from mass_function import MassFunction
 from cosmology import CosmologyFlamingo
-from read_hdf5 import read_soap_log_mass, find_field_particles_snapshot_file
+from read_hdf5 import read_hbt_log_mass, read_soap_log_mass, find_field_particles_snapshot_file
 import yaml
 import sys
 import os
@@ -28,6 +28,10 @@ def get_mass_function(path_config_filename):
     soap_path = path_config["Paths"]["soap_path"]
     redshift = path_config["Params"]["redshift"]
     L = path_config["Params"]["L"]
+    try:
+        halo_type = path_config["Misc"]["halo_type"]
+    except:
+        halo_type = "soap"
     with open(path_config["Paths"]["params_path"], "r") as file:
         used_params = yaml.safe_load(file)
     UnitMass_in_cgs = float(used_params["InternalUnitSystem"]["UnitMass_in_cgs"])
@@ -42,13 +46,18 @@ def get_mass_function(path_config_filename):
     if soap_path[-5:] == ".hdf5": # if the soap path is a single file
 
         input_file = soap_path
-        log_mass = read_soap_log_mass(input_file, UnitMass_in_cgs)
+        if halo_type == "peregrinus":
+            log_mass = read_hbt_log_mass(input_file, UnitMass_in_cgs)
+        else:
+            log_mass = read_soap_log_mass(input_file, UnitMass_in_cgs)
         
         print("Read log mass from file")
 
     else: # if it's a directory
     # location of the snapshots
         soap_files_list = os.listdir(soap_path)
+        if halo_type == "peregrinus":
+            soap_files_list = [file for file in soap_files_list if "Catalogue" in file]
 
         # loop through all files, reading in halo masses
         log_mass = [None]*len(soap_files_list)
@@ -58,7 +67,10 @@ def get_mass_function(path_config_filename):
             input_file = soap_path + file_name
 
             input_file = soap_path
-            log_mass = read_soap_log_mass(input_file, UnitMass_in_cgs)
+            if halo_type == "peregrinus":
+                log_mass = read_hbt_log_mass(input_file, UnitMass_in_cgs)
+            else:
+                log_mass = read_soap_log_mass(input_file, UnitMass_in_cgs)
 
             #halo_cat = CompaSOHaloCatalog(input_file, cleaned=True, fields=['N'])
             #m_par = halo_cat.header["ParticleMassHMsun"]
@@ -115,6 +127,7 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
     L = path_config["Params"]["L"]
     logMmin = path_config["Params"]["logMmin"]
     logMmax = path_config["Params"]["logMmax"]
+
 
     param_file_path = path_config["Paths"]["params_path"]
     with open(param_file_path, "r") as file:
