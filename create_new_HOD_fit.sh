@@ -3,7 +3,7 @@
 # L=1000
 # N=1800
 # simulation="DMO_FIDUCIAL"
-label=L1000N1800_HYDRO
+label=DESIY1_M060_L4400_N6000_NU3000
 path_config="/cosma8/data/dp004/dc-mene1/HOD_Mock_Pipeline/path_config.yml"
 
 mkdir "halo_fitting_${label}"
@@ -35,7 +35,7 @@ cp ../rescaling_code/ -r ./
 #source /global/common/software/desi/users/adematti/cosmodesi_environment.sh main
 #module use /cosma/home/dp004/dc-mene1/software/desi/cosmodesiconda/my-desiconda/modulefiles
 #module load cosmodesiconda/my-desiconda
-source /cosma/home/dp004/dc-mene1/activate-cosmodesiconda
+source /cosma/home/dp004/dc-mene1/use-cosmodesiconda
 
 #python rescaling_code/xi_rescaling_factor.py
 
