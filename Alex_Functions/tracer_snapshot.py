@@ -143,6 +143,12 @@ if __name__ == "__main__":
         path_config = yaml.safe_load(file)
 
     soap_path = path_config["Paths"]["soap_path"]
+
+    try:
+        halo_type = path_config["Misc"]["halo_type"]
+    except:
+        halo_type = "soap"
+
     #photsys = path_config["photsys"]
     #mag_faint = path_config["mag_faint"]
     #redshift = path_config["redshift"]
@@ -178,6 +184,8 @@ if __name__ == "__main__":
 
         # location of the snapshots
         soap_files_list = os.listdir(soap_path)
+        if halo_type == "peregrinus":
+            soap_files_list = [file for file in soap_files_list if "Catalogue" in file] # taking out the Membership files
         # loop through the SOAP files, adding tracers, and saving the output to a file
         for file_number, file_name in enumerate(soap_files_list):
             output_file = path+"galaxy_tracers_"+str(file_number)+".hdf5"

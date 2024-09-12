@@ -66,7 +66,6 @@ def get_mass_function(path_config_filename):
             file_number = int(file_name.split(".")[1])
             input_file = soap_path + file_name
 
-            input_file = soap_path
             if halo_type == "peregrinus":
                 log_mass = read_hbt_log_mass(input_file, UnitMass_in_cgs)
             else:
