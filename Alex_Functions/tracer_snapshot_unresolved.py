@@ -67,9 +67,9 @@ def get_mass_function(path_config_filename):
             input_file = soap_path + file_name
 
             if halo_type == "peregrinus":
-                log_mass = read_hbt_log_mass(input_file, UnitMass_in_cgs)
+                log_mass[file_number] = read_hbt_log_mass(input_file, UnitMass_in_cgs)
             else:
-                log_mass = read_soap_log_mass(input_file, UnitMass_in_cgs)
+                log_mass[file_number] = read_soap_log_mass(input_file, UnitMass_in_cgs)
 
             #halo_cat = CompaSOHaloCatalog(input_file, cleaned=True, fields=['N'])
             #m_par = halo_cat.header["ParticleMassHMsun"]
