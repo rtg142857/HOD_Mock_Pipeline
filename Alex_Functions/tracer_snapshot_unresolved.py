@@ -126,7 +126,7 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
     L = path_config["Params"]["L"]
     logMmin = path_config["Params"]["logMmin"]
     logMmax = path_config["Params"]["logMmax"]
-
+    particle_rate = path_config["Misc"]["particle_rate"]
 
     param_file_path = path_config["Paths"]["params_path"]
     with open(param_file_path, "r") as file:
@@ -140,13 +140,27 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
     snapshot_path = path_config["Paths"]["snapshot_path"]
 
     print("Counting field particles")
-    field_boolean = find_field_particles_snapshot_file(snapshot_path, group_id_default)
-    Npar = field_boolean.sum()
-    gc.collect() # need to run garbage collection to release memory
 
-    # snapshot_files_list = os.listdir(snapshot_path)
-    # N_particles_in_file = np.zeros(len(snapshot_files_list), dtype="i")
-    # field_boolean = np.empty(len(snapshot_files_list), dtype=np.ndarray)
+    if ".hdf5" in snapshot_path: # it's a file
+        field_boolean = find_field_particles_snapshot_file(snapshot_path, group_id_default, particle_rate)
+        Npar = field_boolean.sum()
+        gc.collect() # need to run garbage collection to release memory
+    else: # it's a directory of files
+        snapshot_files_list = os.listdir(snapshot_path)
+        snapshot_files_list = [file for file in snapshot_files_list if file.count(".") == 2]
+        N_particles_in_file = np.zeros(len(snapshot_files_list), dtype="i")
+        field_boolean = [None]*len(snapshot_files_list)
+
+        for file_name in snapshot_files_list:
+            file_number = int(file_name.split(".")[1])
+            input_file = snapshot_path + file_name
+            field_boolean[file_number] = find_field_particles_snapshot_file(input_file, group_id_default, particle_rate)
+            N_particles_in_file[file_number] = field_boolean[file_number].sum()
+
+            gc.collect() # release memory
+
+        Npar = N_particles_in_file.sum()
+
     # for file_name in snapshot_files_list:
     #     file_number = int(file_name.split(".")[1])
     #     file_path = snapshot_path + file_name
@@ -173,28 +187,59 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
     
     print("Choosing random particles to keep")
     
-    # choose random particles to keep, based on probability
-    keep_unfiltered = np.random.rand(int(field_boolean.shape[0])) <= prob
-    keep = np.logical_and(keep_unfiltered, field_boolean)
-    
-    # generate random masses for particles
-    log_mass = mass_function.get_random_masses(np.count_nonzero(keep), logMmin, logMmax)
-    
-    # get pos and vel of random particles
-    #data = read_asdf(file_name, load_pos=True, load_vel=True)
-    data = sw.load(snapshot_path)
-    pos = np.array(data.dark_matter.coordinates[keep])# + L/2
-    vel = np.array(data.dark_matter.velocities[keep])
-    
-    del data
-    gc.collect() # need to run garbage collection to release memory
+    if ".hdf5" in snapshot_path:
+        # choose random particles to keep, based on probability
+        keep_unfiltered = np.random.rand(int(field_boolean.shape[0])) <= prob
+        keep = np.logical_and(keep_unfiltered, field_boolean)
+        
+        # generate random masses for particles
+        log_mass = mass_function.get_random_masses(np.count_nonzero(keep), logMmin, logMmax)
+        
+        # get pos and vel of random particles
+        #data = read_asdf(file_name, load_pos=True, load_vel=True)
+        data = sw.load(snapshot_path)
+        pos = np.array(data.dark_matter.coordinates)[::particle_rate].copy()
+        pos = pos[keep]
+        vel = np.array(data.dark_matter.velocities)[::particle_rate].copy()
+        vel = vel[keep]
+        
+        del data
+        gc.collect() # need to run garbage collection to release memory
 
-    # save to file, converting masses to units 1e10 Msun/h
-    f = h5py.File(output_file%0, "a")
-    f.create_dataset("mass",     data=10**(log_mass-10), compression="gzip")
-    f.create_dataset("position", data=pos, compression="gzip")
-    f.create_dataset("velocity", data=vel, compression="gzip")
-    f.close()
+        # save to file, converting masses to units 1e10 Msun/h
+        print("Saving field particles to file as unresolved tracers")
+        f = h5py.File(output_file%0, "a")
+        f.create_dataset("mass",     data=10**(log_mass-10), compression="gzip")
+        f.create_dataset("position", data=pos, compression="gzip")
+        f.create_dataset("velocity", data=vel, compression="gzip")
+        f.close()
+    else:
+        for file_name in snapshot_files_list:
+            file_number = int(file_name.split(".")[1])
+            input_file = snapshot_path + file_name
+
+            keep_unfiltered = np.random.rand(int(field_boolean[file_number].shape[0])) <= prob
+            keep = np.logical_and(keep_unfiltered, field_boolean[file_number])
+
+            # generate random masses for particles
+            log_mass = mass_function.get_random_masses(np.count_nonzero(keep), logMmin, logMmax)
+            
+            # get pos and vel of random particles
+            #data = read_asdf(file_name, load_pos=True, load_vel=True)
+            data = sw.load(input_file)
+            pos = np.array(data.dark_matter.coordinates[keep])
+            vel = np.array(data.dark_matter.velocities[keep])
+            
+            del data
+            gc.collect() # need to run garbage collection to release memory
+
+            # save to file, converting masses to units 1e10 Msun/h
+            print("Saving field particles to file as unresolved tracers")
+            f = h5py.File(output_file%file_number, "a")
+            f.create_dataset("mass",     data=10**(log_mass-10), compression="gzip")
+            f.create_dataset("position", data=pos, compression="gzip")
+            f.create_dataset("velocity", data=vel, compression="gzip")
+            f.close()
 
     # for file_name in snapshot_files_list:
     #     file_number = file_name.split(".")[1]

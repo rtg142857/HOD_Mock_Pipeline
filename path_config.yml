@@ -7,7 +7,7 @@
 Paths:
   soap_path: /cosma8/data/dp004/dc-elbe1/peregrinus/runs/DESIY1_M060_L4400_N6000_NU3000/hbt/hbt_groups/133/ # SOAP output file at a certain redshift
   soap_meta_path: /cosma8/data/dp004/dc-elbe1/peregrinus/runs/DESIY1_M060_L4400_N6000_NU3000/hbt/hbt_groups/ # folder containing folders for different redshifts
-  snapshot_path: /cosma8/data/dp004/dc-elbe1/peregrinus/runs/DESIY1_M060_L4400_N6000_NU3000/snapshots/peregrine_0133/peregrine_0133.hdf5
+  snapshot_path: /cosma8/data/dp004/dc-elbe1/peregrinus/runs/DESIY1_M060_L4400_N6000_NU3000/snapshots/peregrine_0133/
   lightcone_path: #/cosma8/data/dp004/dc-elbe1/FLAMINGO/halo_lightcones/L1000N1800/HYDRO_FIDUCIAL/halo_lightcone.hdf5
   params_path: /cosma8/data/dp004/dc-elbe1/peregrinus/runs/DESIY1_M060_L4400_N6000_NU3000/used_parameters.yml
   output_list_path: /cosma8/data/dp004/dc-elbe1/peregrinus/runs/DESIY1_M060_L4400_N6000_NU3000/output_list.txt # has the redshift of each snapshot
@@ -32,6 +32,7 @@ Params:
 Misc:
   random_seed: 1
   halo_type: peregrinus # soap, peregrinus, ...
+  particle_rate: 1000 # how many field particles to look at for the unresolved tracers; 1 means all, 2 means every other, ...
 
 Labels:
   sim_label: "DESIY1_M060_L4400_N6000_NU3000" # just for labelling output files

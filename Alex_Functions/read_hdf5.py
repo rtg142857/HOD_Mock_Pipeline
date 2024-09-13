@@ -26,17 +26,20 @@ def read_hbt_log_mass(input_file, UnitMass_in_cgs):
     log_mass = np.log10(np.array(halo_cat["Subhalos"]["BoundM200Crit"]) * UnitMass_in_Msol)
     return log_mass
 
-def find_field_particles_snapshot_file(input_file, group_id_default):
+def find_field_particles_snapshot_file(input_file, group_id_default, particle_rate):
     """
     Identify the field particles (DM particles not in FOF halos) in a Flamingo snapshot file.
     Return a boolean array representing whether or not each particle in the file is a field particle.
     Args:
         input_file: Path to the Flamingo snapshot file.
         group_id_default: Halo ID given to field particles (particles not in halos).
+        particle_rate: If particle_rate is N, only consider every Nth particle. Done to avoid out of memory errors.
     """
     data = sw.load(input_file)
-    field_boolean = (data.dark_matter.fofgroup_ids == group_id_default)
+    DM_IDs = data.dark_matter.fofgroup_ids[::particle_rate].copy()
+    field_boolean = (DM_IDs == group_id_default)
     del data
+    del DM_IDs
     return field_boolean
 
 #def count_field_particles_snapshot_directory(input_directory, group_id_default):
