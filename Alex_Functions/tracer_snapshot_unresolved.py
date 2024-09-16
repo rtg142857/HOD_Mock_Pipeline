@@ -227,8 +227,10 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
             # get pos and vel of random particles
             #data = read_asdf(file_name, load_pos=True, load_vel=True)
             data = sw.load(input_file)
-            pos = np.array(data.dark_matter.coordinates[keep])
-            vel = np.array(data.dark_matter.velocities[keep])
+            pos = np.array(data.dark_matter.coordinates)[::particle_rate].copy()
+            pos = pos[keep]
+            vel = np.array(data.dark_matter.velocities)[::particle_rate].copy()
+            vel = vel[keep]
             
             del data
             gc.collect() # need to run garbage collection to release memory
