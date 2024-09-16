@@ -294,7 +294,7 @@ class CosmologyFlamingo(Cosmology):
             n_s = None
 
         try:
-            A_s = config.get("cosmology", "nAs")
+            A_s = config.get("cosmology", "A_s")
         except:
             A_s = None
 
