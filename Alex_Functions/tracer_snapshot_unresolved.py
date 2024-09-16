@@ -103,7 +103,7 @@ def get_mass_function(path_config_filename):
     return mf
 
 
-def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_filename):
+def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_filename, prob=None):
     """
     Make file of central galaxy tracers for unresolved haloes, using Flamingo field particles
     (particles not in haloes)
@@ -111,6 +111,7 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
         output_file: path of hdf5 file to save output
         mass_function: halo mass function, of class MassFunction
         path_config_filename: Path to the config file containing paths to other useful things
+        prob: Probability of keeping a particle, defaults to None; if None, will calculate probability (slow)
     Old args:
         simulation:  Abacus simulation. Default is "base"
         box_size:    Simulation box size, in Mpc/h. Default is 2000 Mpc/h
@@ -140,54 +141,55 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
     # get total number of field particles (formerly using A particles)
     snapshot_path = path_config["Paths"]["snapshot_path"]
 
-    print("Counting field particles", flush=True)
+    if prob == None:
+        print("Counting field particles", flush=True)
 
-    if ".hdf5" in snapshot_path: # it's a file
-        field_boolean = find_field_particles_snapshot_file(snapshot_path, group_id_default, particle_rate)
-        Npar = field_boolean.sum()
-        gc.collect() # need to run garbage collection to release memory
-    else: # it's a directory of files
-        snapshot_files_list = os.listdir(snapshot_path)
-        snapshot_files_list = [file for file in snapshot_files_list if file.count(".") == 2]
-        N_particles_in_file = np.zeros(len(snapshot_files_list), dtype="i")
-        field_boolean = [None]*len(snapshot_files_list)
+        if ".hdf5" in snapshot_path: # it's a file
+            field_boolean = find_field_particles_snapshot_file(snapshot_path, group_id_default, particle_rate)
+            Npar = field_boolean.sum()
+            gc.collect() # need to run garbage collection to release memory
+        else: # it's a directory of files
+            snapshot_files_list = os.listdir(snapshot_path)
+            snapshot_files_list = [file for file in snapshot_files_list if file.count(".") == 2]
+            N_particles_in_file = np.zeros(len(snapshot_files_list), dtype="i")
+            field_boolean = [None]*len(snapshot_files_list)
 
-        for file_name in snapshot_files_list:
-            file_number = int(file_name.split(".")[1])
-            input_file = snapshot_path + file_name
-            print("Finding field particles (file "+str(file_number)+" out of "+str(len(snapshot_files_list))+")...", flush=True)
-            field_boolean[file_number] = find_field_particles_snapshot_file(input_file, group_id_default, particle_rate)
-            N_particles_in_file[file_number] = field_boolean[file_number].sum()
+            for file_name in snapshot_files_list:
+                file_number = int(file_name.split(".")[1])
+                input_file = snapshot_path + file_name
+                print("Finding field particles (file "+str(file_number)+" out of "+str(len(snapshot_files_list))+")...", flush=True)
+                field_boolean[file_number] = find_field_particles_snapshot_file(input_file, group_id_default, particle_rate)
+                N_particles_in_file[file_number] = field_boolean[file_number].sum()
 
-            gc.collect() # release memory
+                gc.collect() # release memory
 
-        Npar = N_particles_in_file.sum()
+            Npar = N_particles_in_file.sum()
 
-    # for file_name in snapshot_files_list:
-    #     file_number = int(file_name.split(".")[1])
-    #     file_path = snapshot_path + file_name
-    #     # this loop is slow. Is there a faster way to get total number of field particles in each file?
-    #     #file_name = path+"z%.3f/field_rv_A/field_rv_A_%03d.asdf"%(redshift, file_number)
-    #     #file_name = "/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_snapshot_77.hdf5"
+        # for file_name in snapshot_files_list:
+        #     file_number = int(file_name.split(".")[1])
+        #     file_path = snapshot_path + file_name
+        #     # this loop is slow. Is there a faster way to get total number of field particles in each file?
+        #     #file_name = path+"z%.3f/field_rv_A/field_rv_A_%03d.asdf"%(redshift, file_number)
+        #     #file_name = "/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_snapshot_77.hdf5"
 
-    #     #file = h5py.File(file_name, "r")
-    #     #data = read_asdf(file_name, load_pos=True, load_vel=False)
-    #     #p = data["pos"]
+        #     #file = h5py.File(file_name, "r")
+        #     #data = read_asdf(file_name, load_pos=True, load_vel=False)
+        #     #p = data["pos"]
 
-    #     data = sw.load(file_path)
-    #     p = (data.dark_matter.fofgroup_ids == group_id_default)
-    #     del data
-    #     field_boolean[file_number] = p
-    #     N_particles_in_file[file_number] = p.sum()
-    #     gc.collect() # need to run garbage collection to release memory
+        #     data = sw.load(file_path)
+        #     p = (data.dark_matter.fofgroup_ids == group_id_default)
+        #     del data
+        #     field_boolean[file_number] = p
+        #     N_particles_in_file[file_number] = p.sum()
+        #     gc.collect() # need to run garbage collection to release memory
 
-    # total number of field particles in full snapshot
-    #Npar = np.sum(N_particles_in_file)
+        # total number of field particles in full snapshot
+        #Npar = np.sum(N_particles_in_file)
+        
+        # probability to keep a particle
+        prob = Nrand*1.0 / Npar
     
-    # probability to keep a particle
-    prob = Nrand*1.0 / Npar
-    
-    print("Choosing random particles to keep", flush=True)
+    print("Choosing random particles to keep with probability "+str(prob), flush=True)
     
     if ".hdf5" in snapshot_path:
         # choose random particles to keep, based on probability
@@ -238,7 +240,7 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
             gc.collect() # need to run garbage collection to release memory
 
             # save to file, converting masses to units 1e10 Msun/h
-            print("Saving field particles to file as unresolved tracers", flush=True)
+            print("Saving field particles to file "+str(file_number)+" as unresolved tracers", flush=True)
             f = h5py.File(output_file%file_number, "a")
             f.create_dataset("mass",     data=10**(log_mass-10), compression="gzip")
             f.create_dataset("position", data=pos, compression="gzip")
@@ -277,8 +279,7 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
     #     f.create_dataset("position", data=pos, compression="gzip")
     #     f.create_dataset("velocity", data=vel, compression="gzip")
     #     f.close()
-        
-        
+
         
 if __name__ == "__main__":
     path_config_filename = sys.argv[1] # Config file path
@@ -318,9 +319,9 @@ if __name__ == "__main__":
     # Automatically loops over all files
     print("Getting mass function for unresolved tracers")
     mass_function = get_mass_function(path_config_filename)
+
     print("Unresolved tracer mass function obtained, making snapshot tracers now")
     # make file of central tracers, using particles, assigning random masses from mass function
     # this function automatically loops through all files
-    make_snapshot_tracers_unresolved(output_file, mass_function, path_config_filename=path_config_filename)
-    #print("WARNING: Not creating any unresolved tracers")
+    make_snapshot_tracers_unresolved(output_file, mass_function, path_config_filename=path_config_filename, prob=None)
   
