@@ -155,6 +155,7 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
         for file_name in snapshot_files_list:
             file_number = int(file_name.split(".")[1])
             input_file = snapshot_path + file_name
+            print("Finding field particles (file "+str(file_number)+" out of "+str(len(snapshot_files_list))+")...", flush=True)
             field_boolean[file_number] = find_field_particles_snapshot_file(input_file, group_id_default, particle_rate)
             N_particles_in_file[file_number] = field_boolean[file_number].sum()
 
