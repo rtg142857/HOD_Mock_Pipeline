@@ -289,12 +289,12 @@ class CosmologyFlamingo(Cosmology):
         engine="class"
 
         try:
-            n_s = config.get("cosmology", "n_s")
+            n_s = float(config.get("cosmology", "n_s"))
         except:
             n_s = None
 
         try:
-            A_s = config.get("cosmology", "A_s")
+            A_s = float(config.get("cosmology", "A_s"))
         except:
             A_s = None
 
