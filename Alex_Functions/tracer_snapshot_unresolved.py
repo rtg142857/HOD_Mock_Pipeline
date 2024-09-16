@@ -43,7 +43,7 @@ def get_mass_function(path_config_filename):
     #input_file = "/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_soap.hdf5"
     #print("WARNING: Using incorrect path for making unresolved snapshot tracer halo mass function")
 
-    print("Reading log mass from file...")
+    print("Reading log mass from file...", flush=True)
     if soap_path[-5:] == ".hdf5": # if the soap path is a single file
 
         input_file = soap_path
@@ -52,7 +52,7 @@ def get_mass_function(path_config_filename):
         else:
             log_mass = read_soap_log_mass(input_file, UnitMass_in_cgs)
         
-        print("Read log mass from file")
+        print("Read log mass from file", flush=True)
 
     else: # if it's a directory
     # location of the snapshots
@@ -79,7 +79,7 @@ def get_mass_function(path_config_filename):
             print(file_number, len(log_mass[file_number]))
 
         log_mass = np.concatenate(log_mass)
-        print("Read log mass from files")
+        print("Read log mass from files", flush=True)
 
     # get number densities in mass bins  
     bin_size = 0.02
@@ -140,7 +140,7 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
     # get total number of field particles (formerly using A particles)
     snapshot_path = path_config["Paths"]["snapshot_path"]
 
-    print("Counting field particles")
+    print("Counting field particles", flush=True)
 
     if ".hdf5" in snapshot_path: # it's a file
         field_boolean = find_field_particles_snapshot_file(snapshot_path, group_id_default, particle_rate)
@@ -186,7 +186,7 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
     # probability to keep a particle
     prob = Nrand*1.0 / Npar
     
-    print("Choosing random particles to keep")
+    print("Choosing random particles to keep", flush=True)
     
     if ".hdf5" in snapshot_path:
         # choose random particles to keep, based on probability
@@ -208,7 +208,7 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
         gc.collect() # need to run garbage collection to release memory
 
         # save to file, converting masses to units 1e10 Msun/h
-        print("Saving field particles to file as unresolved tracers")
+        print("Saving field particles to file as unresolved tracers", flush=True)
         f = h5py.File(output_file%0, "a")
         f.create_dataset("mass",     data=10**(log_mass-10), compression="gzip")
         f.create_dataset("position", data=pos, compression="gzip")
@@ -237,7 +237,7 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
             gc.collect() # need to run garbage collection to release memory
 
             # save to file, converting masses to units 1e10 Msun/h
-            print("Saving field particles to file as unresolved tracers")
+            print("Saving field particles to file as unresolved tracers", flush=True)
             f = h5py.File(output_file%file_number, "a")
             f.create_dataset("mass",     data=10**(log_mass-10), compression="gzip")
             f.create_dataset("position", data=pos, compression="gzip")
