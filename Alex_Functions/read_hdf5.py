@@ -36,7 +36,7 @@ def find_field_particles_snapshot_file(input_file, group_id_default, particle_ra
         particle_rate: If particle_rate is N, only consider every Nth particle. Done to avoid out of memory errors.
     """
     data = sw.load(input_file)
-    DM_IDs = data.dark_matter.fofgroup_ids[::particle_rate].copy()
+    DM_IDs = data.dark_matter.fofgroup_ids[::particle_rate]
     field_boolean = (DM_IDs == group_id_default)
     del data
     del DM_IDs

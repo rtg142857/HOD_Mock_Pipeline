@@ -43,6 +43,7 @@ def get_mass_function(path_config_filename):
     #input_file = "/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_soap.hdf5"
     #print("WARNING: Using incorrect path for making unresolved snapshot tracer halo mass function")
 
+    print("Reading log mass from file...")
     if soap_path[-5:] == ".hdf5": # if the soap path is a single file
 
         input_file = soap_path
@@ -198,9 +199,9 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
         # get pos and vel of random particles
         #data = read_asdf(file_name, load_pos=True, load_vel=True)
         data = sw.load(snapshot_path)
-        pos = np.array(data.dark_matter.coordinates)[::particle_rate].copy()
+        pos = np.array(data.dark_matter.coordinates)[::particle_rate]
         pos = pos[keep]
-        vel = np.array(data.dark_matter.velocities)[::particle_rate].copy()
+        vel = np.array(data.dark_matter.velocities)[::particle_rate]
         vel = vel[keep]
         
         del data
@@ -227,9 +228,9 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
             # get pos and vel of random particles
             #data = read_asdf(file_name, load_pos=True, load_vel=True)
             data = sw.load(input_file)
-            pos = np.array(data.dark_matter.coordinates)[::particle_rate].copy()
+            pos = np.array(data.dark_matter.coordinates)[::particle_rate]
             pos = pos[keep]
-            vel = np.array(data.dark_matter.velocities)[::particle_rate].copy()
+            vel = np.array(data.dark_matter.velocities)[::particle_rate]
             vel = vel[keep]
             
             del data
@@ -314,8 +315,9 @@ if __name__ == "__main__":
     
     # get halo mass function
     # Automatically loops over all files
+    print("Getting mass function for unresolved tracers")
     mass_function = get_mass_function(path_config_filename)
-    
+    print("Unresolved tracer mass function obtained, making snapshot tracers now")
     # make file of central tracers, using particles, assigning random masses from mass function
     # this function automatically loops through all files
     make_snapshot_tracers_unresolved(output_file, mass_function, path_config_filename=path_config_filename)
