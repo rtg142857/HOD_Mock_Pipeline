@@ -299,6 +299,11 @@ class CosmologyFlamingo(Cosmology):
             A_s = None
 
         try:
+            A_s = float(config.get("cosmology", "A_s"))
+        except:
+            A_s = None
+
+        try:
             w0_fld = run_params["Cosmology"]["w_0"]
         except:
             w0_fld = None

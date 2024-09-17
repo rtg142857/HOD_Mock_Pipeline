@@ -9,6 +9,10 @@ from read_hdf5 import read_hbt_log_mass, read_soap_log_mass, find_field_particle
 import yaml
 import sys
 import os
+try:
+    import cPickle as pickle
+except ModuleNotFoundError:
+    import pickle
 
 def get_mass_function(path_config_filename):
     """
@@ -103,7 +107,7 @@ def get_mass_function(path_config_filename):
     return mf
 
 
-def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_filename, prob=None):
+def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_filename):
     """
     Make file of central galaxy tracers for unresolved haloes, using Flamingo field particles
     (particles not in haloes)
@@ -111,7 +115,6 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
         output_file: path of hdf5 file to save output
         mass_function: halo mass function, of class MassFunction
         path_config_filename: Path to the config file containing paths to other useful things
-        prob: Probability of keeping a particle, defaults to None; if None, will calculate probability (slow)
     Old args:
         simulation:  Abacus simulation. Default is "base"
         box_size:    Simulation box size, in Mpc/h. Default is 2000 Mpc/h
@@ -141,13 +144,18 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
     # get total number of field particles (formerly using A particles)
     snapshot_path = path_config["Paths"]["snapshot_path"]
 
-    if prob == None:
+    if not os.path.isfile("tracer_output/field_boolean.pickle"):
         print("Counting field particles", flush=True)
 
         if ".hdf5" in snapshot_path: # it's a file
             field_boolean = find_field_particles_snapshot_file(snapshot_path, group_id_default, particle_rate)
             Npar = field_boolean.sum()
             gc.collect() # need to run garbage collection to release memory
+
+            #save field boolean to pickle file
+            with open("tracer_output/field_boolean.pickle", "wb") as handle:
+                pickle.dump(field_boolean, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
         else: # it's a directory of files
             snapshot_files_list = os.listdir(snapshot_path)
             snapshot_files_list = [file for file in snapshot_files_list if file.count(".") == 2]
@@ -163,31 +171,24 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
 
                 gc.collect() # release memory
 
+            #save field boolean to pickle file
+            with open("tracer_output/field_boolean.pickle", "wb") as handle:
+                pickle.dump(field_boolean, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
             Npar = N_particles_in_file.sum()
 
-        # for file_name in snapshot_files_list:
-        #     file_number = int(file_name.split(".")[1])
-        #     file_path = snapshot_path + file_name
-        #     # this loop is slow. Is there a faster way to get total number of field particles in each file?
-        #     #file_name = path+"z%.3f/field_rv_A/field_rv_A_%03d.asdf"%(redshift, file_number)
-        #     #file_name = "/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_snapshot_77.hdf5"
+    else: # if there's a field boolean pickle file
+        with open("tracer_output/field_boolean.pickle", "rb") as handle:
+            field_boolean = pickle.load(handle)
+            if isinstance(field_boolean, list):
+                N_particles_in_file = [array.sum() for array in field_boolean]
+                Npar = N_particles_in_file.sum()
+            else:
+                Npar = field_boolean.sum()
 
-        #     #file = h5py.File(file_name, "r")
-        #     #data = read_asdf(file_name, load_pos=True, load_vel=False)
-        #     #p = data["pos"]
-
-        #     data = sw.load(file_path)
-        #     p = (data.dark_matter.fofgroup_ids == group_id_default)
-        #     del data
-        #     field_boolean[file_number] = p
-        #     N_particles_in_file[file_number] = p.sum()
-        #     gc.collect() # need to run garbage collection to release memory
-
-        # total number of field particles in full snapshot
-        #Npar = np.sum(N_particles_in_file)
         
-        # probability to keep a particle
-        prob = Nrand*1.0 / Npar
+    # probability to keep a particle
+    prob = Nrand*1.0 / Npar
     
     print("Choosing random particles to keep with probability "+str(prob), flush=True)
     
@@ -218,34 +219,37 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
         f.create_dataset("velocity", data=vel, compression="gzip")
         f.close()
     else:
+        snapshot_files_list = os.listdir(snapshot_path)
+        snapshot_files_list = [file for file in snapshot_files_list if file.count(".") == 2]
         for file_name in snapshot_files_list:
             file_number = int(file_name.split(".")[1])
             input_file = snapshot_path + file_name
 
-            keep_unfiltered = np.random.rand(int(field_boolean[file_number].shape[0])) <= prob
-            keep = np.logical_and(keep_unfiltered, field_boolean[file_number])
+            if not os.path.isfile(output_file%file_number): # only write to file if it doesn't already exist
+                keep_unfiltered = np.random.rand(int(field_boolean[file_number].shape[0])) <= prob
+                keep = np.logical_and(keep_unfiltered, field_boolean[file_number])
 
-            # generate random masses for particles
-            log_mass = mass_function.get_random_masses(np.count_nonzero(keep), logMmin, logMmax)
-            
-            # get pos and vel of random particles
-            #data = read_asdf(file_name, load_pos=True, load_vel=True)
-            data = sw.load(input_file)
-            pos = np.array(data.dark_matter.coordinates)[::particle_rate]
-            pos = pos[keep]
-            vel = np.array(data.dark_matter.velocities)[::particle_rate]
-            vel = vel[keep]
-            
-            del data
-            gc.collect() # need to run garbage collection to release memory
+                # generate random masses for particles
+                log_mass = mass_function.get_random_masses(np.count_nonzero(keep), logMmin, logMmax)
+                
+                # get pos and vel of random particles
+                #data = read_asdf(file_name, load_pos=True, load_vel=True)
+                data = sw.load(input_file)
+                pos = np.array(data.dark_matter.coordinates)[::particle_rate]
+                pos = pos[keep]
+                vel = np.array(data.dark_matter.velocities)[::particle_rate]
+                vel = vel[keep]
+                
+                del data
+                gc.collect() # need to run garbage collection to release memory
 
-            # save to file, converting masses to units 1e10 Msun/h
-            print("Saving field particles to file "+str(file_number)+" as unresolved tracers", flush=True)
-            f = h5py.File(output_file%file_number, "a")
-            f.create_dataset("mass",     data=10**(log_mass-10), compression="gzip")
-            f.create_dataset("position", data=pos, compression="gzip")
-            f.create_dataset("velocity", data=vel, compression="gzip")
-            f.close()
+                # save to file, converting masses to units 1e10 Msun/h
+                print("Saving field particles to file "+str(file_number)+" as unresolved tracers", flush=True)
+                f = h5py.File(output_file%file_number, "a")
+                f.create_dataset("mass",     data=10**(log_mass-10), compression="gzip")
+                f.create_dataset("position", data=pos, compression="gzip")
+                f.create_dataset("velocity", data=vel, compression="gzip")
+                f.close()
 
     # for file_name in snapshot_files_list:
     #     file_number = file_name.split(".")[1]
@@ -323,5 +327,5 @@ if __name__ == "__main__":
     print("Unresolved tracer mass function obtained, making snapshot tracers now")
     # make file of central tracers, using particles, assigning random masses from mass function
     # this function automatically loops through all files
-    make_snapshot_tracers_unresolved(output_file, mass_function, path_config_filename=path_config_filename, prob=None)
+    make_snapshot_tracers_unresolved(output_file, mass_function, path_config_filename=path_config_filename)
   
