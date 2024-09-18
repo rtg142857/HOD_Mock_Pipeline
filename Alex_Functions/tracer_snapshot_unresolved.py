@@ -182,7 +182,7 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
             field_boolean = pickle.load(handle)
             if isinstance(field_boolean, list):
                 N_particles_in_file = [array.sum() for array in field_boolean]
-                Npar = N_particles_in_file.sum()
+                Npar = sum(N_particles_in_file)
             else:
                 Npar = field_boolean.sum()
 
