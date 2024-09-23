@@ -27,7 +27,8 @@ module load cosmodesiconda/my-desiconda
 #module load python/3.10.12
 
 # Only do the halo paircounting in this step
-python cencen.py $1
-python censat.py $1
-python satsat.py $1
-python satsat_onehalo.py $1
+#python cencen.py $1
+#python censat.py $1
+#python satsat.py $1
+#python satsat_onehalo.py $1
+python all_pairs.py $1
