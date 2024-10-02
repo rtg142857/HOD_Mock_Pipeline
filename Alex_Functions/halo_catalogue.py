@@ -165,7 +165,8 @@ class FlamingoSnapshot(HaloCatalogue):
         # halo_cat.init
 
         halo_cat = h5py.File(file_name, "r")
-        # We use the 200_mean definition of spherical overdensity, to best match what's used by Abacus
+        # We use the 200_mean definition of spherical overdensity, for consistency
+        # 200_mean is what's used by Abacus but we don't always have that here
         # ("spherical density definition is a function of epoch; value is stored relative to the mean cosmic density")
         self.so_density = 200
 
@@ -176,22 +177,27 @@ class FlamingoSnapshot(HaloCatalogue):
         # pos: looking for "center of mass position of largest L2 subhalo"
         # vel: looking for Center of mass vel of the largest L2 subhalo
         # mass: looking for number of particles in the halo * particle mass
-        # rvmax: looking for Radius of max circular velocity, relative to the L2 center, stored as the ratio to r100 condensed to [0,30000]
+        # rvmax: looking for Radius of max circular velocity, relative to the L2 center, stored as the ratio to r100 (radius of 100% of the mass) condensed to [0,30000]
         if halo_type == "soap":
+            is_not_subhalo = np.array(halo_cat["InputHalos"]["HBTplus"]["Depth"]) == 0
             self._quantities = {
-                'pos':   np.array(halo_cat["SO"]["200_mean"]["CentreOfMass"]),
-                'vel':   np.array(halo_cat["SO"]["200_mean"]["CentreOfMassVelocity"]),
-                'mass':  np.array(halo_cat["SO"]["200_mean"]["DarkMatterMass"]) * UnitMass_in_Msol,
-                'rvmax': np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"]) / np.array(halo_cat["SO"]["50_crit"]["SORadius"])
+                'pos':   np.array(halo_cat["SO"]["200_crit"]["CentreOfMass"])[is_not_subhalo],
+                'vel':   np.array(halo_cat["SO"]["200_crit"]["CentreOfMassVelocity"])[is_not_subhalo],
+                'mass':  np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"])[is_not_subhalo] * UnitMass_in_Msol,
+                'rvmax': np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"])[is_not_subhalo] / np.array(halo_cat["SO"]["200_crit"]["SORadius"])[is_not_subhalo]
                 # TODO: Check if the maximum circ velocity radius can be done via SO
                 #'r200': halo_cat["Subhalos"]["BoundR200CritComoving"]
             }
         elif halo_type == "peregrinus":
+            is_not_subhalo = np.array(halo_cat["Subhalos"]["Rank"]) == 0
+            # Some (field) halos have 0 mass and 0 radius; these are the orphan halos that were ejected from their host halo; we discard these
+            is_not_0mass = np.array(halo_cat["Subhalos"]["BoundM200Crit"]) != 0
+            relevant_field_halos = np.logical_and(is_not_0mass, is_not_subhalo)
             self._quantities = {
-                'pos':   np.array(halo_cat["Subhalos"]["ComovingAveragePosition"]),
-                'vel':   np.array(halo_cat["Subhalos"]["PhysicalAverageVelocity"]),
-                'mass':  np.array(halo_cat["Subhalos"]["BoundM200Crit"]) * UnitMass_in_Msol,
-                'rvmax': np.array(halo_cat["Subhalos"]["RmaxComoving"]) / np.array(halo_cat["Subhalos"]["REncloseComoving"])
+                'pos':   np.array(halo_cat["Subhalos"]["ComovingAveragePosition"])[relevant_field_halos],
+                'vel':   np.array(halo_cat["Subhalos"]["PhysicalAverageVelocity"])[relevant_field_halos],
+                'mass':  np.array(halo_cat["Subhalos"]["BoundM200Crit"])[relevant_field_halos] * UnitMass_in_Msol,
+                'rvmax': np.array(halo_cat["Subhalos"]["RmaxComoving"])[relevant_field_halos] / np.array(halo_cat["Subhalos"]["REncloseComoving"])[relevant_field_halos]
                 # TODO: Check if the maximum circ velocity radius can be done via SO
                 #'r200': halo_cat["Subhalos"]["BoundR200CritComoving"]
             }
