@@ -65,7 +65,7 @@ def get_average_dm_particle_mass(path_config_filename):
     else:
         snapshot_files_list = os.listdir(snapshot_path)
         snapshot_files_list = [file for file in snapshot_files_list if file.count(".") == 2]
-        file_path = snapshot_files_list[0]
+        file_path = snapshot_path + snapshot_files_list[0]
 
     f = h5py.File(file_path, "r")
     mass_array = f["DMParticles"]["Masses"]
