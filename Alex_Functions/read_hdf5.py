@@ -13,9 +13,12 @@ def read_soap_log_mass(input_file, UnitMass_in_cgs):
     """
     halo_cat = h5py.File(input_file, "r")
     is_not_subhalo = np.array(halo_cat["InputHalos"]["HBTplus"]["Depth"]) == 0
+    # Some (field) halos have 0 mass and 0 radius; these are probably the orphan halos that were ejected from their host halo; we discard these
+    is_not_0mass = np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"]) != 0
+    relevant_field_halos = np.logical_and(is_not_0mass, is_not_subhalo)
 
     UnitMass_in_Msol = UnitMass_in_cgs / 1.98841e33
-    log_mass = np.log10(np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"])[is_not_subhalo] * UnitMass_in_Msol)
+    log_mass = np.log10(np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"])[relevant_field_halos] * UnitMass_in_Msol)
     return log_mass
 
 def read_hbt_log_mass(input_file, UnitMass_in_cgs):
@@ -27,7 +30,7 @@ def read_hbt_log_mass(input_file, UnitMass_in_cgs):
     """
     halo_cat = h5py.File(input_file, "r")
     is_not_subhalo = np.array(halo_cat["Subhalos"]["Rank"]) == 0
-    # Some (field) halos have 0 mass and 0 radius; these are the orphan halos that were ejected from their host halo; we discard these
+    # Some (field) halos have 0 mass and 0 radius; these are probably the orphan halos that were ejected from their host halo; we discard these
     is_not_0mass = np.array(halo_cat["Subhalos"]["BoundM200Crit"]) != 0
     relevant_field_halos = np.logical_and(is_not_0mass, is_not_subhalo)
 
@@ -82,15 +85,24 @@ def get_log_min_halo_mass(path_config_filename):
     used_parameters_path = path_config["Paths"]["params_path"]
     with open(used_parameters_path, "r") as file:
         params = yaml.safe_load(file)
+
+    unit_mass = params["Snapshots"]["UnitMass_in_cgs"] / 1.98841e33
+    particle_mass_Msol = get_average_dm_particle_mass(path_config_filename) * unit_mass
     
     if halo_type == "soap":
         halo_cat = h5py.File(soap_path, "r")
-        unit_mass = params["Snapshots"]["UnitMass_in_cgs"] / 1.98841e33
-        particle_mass_Msol = get_average_dm_particle_mass(path_config_filename) * unit_mass
         min_halo_mass_Msol = particle_mass_Msol * halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"].attrs["Mask Threshold"]
         return np.log10(min_halo_mass_Msol)
-    else:
-        raise Exception("Add log min halo mass finder for Peregrinus boi")
+    elif halo_type == "peregrinus":
+        # if ".hdf5" in soap_path:
+        #     halo_cat = h5py.File(soap_path, "r")
+        # else:
+        #     soap_files_list = os.listdir(soap_path)
+        #     soap_files_list = [file for file in soap_files_list if "Catalogue" in file]
+        #     halo_cat = h5py.File(soap_path + soap_files_list, "r")
+        print("Assuming 20 particles in smallest halos (double-check in hbt_params.txt)")
+        MinNumPartOfSub = 20
+        return np.log10(particle_mass_Msol * MinNumPartOfSub)
 
 #def count_field_particles_snapshot_directory(input_directory, group_id_default):
     """
