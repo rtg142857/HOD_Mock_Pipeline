@@ -3,9 +3,9 @@
 # First argument is the path to the path_config.yml file
 
 #SBATCH --ntasks 1 # The number of cores you need...
-#SBATCH -J HOD_pipeline_testing #Give it something meaningful.
-#SBATCH -o logs/tracer_snap
-#SBATCH -e logs/tracer_snap_error
+#SBATCH -J tracer_making #Give it something meaningful.
+#SBATCH -o logs/out_tracers
+#SBATCH -e logs/err_tracers
 #SBATCH -p cosma8 #or some other partition, e.g. cosma, cosma8, etc.
 #SBATCH -A dp004
 #SBATCH --exclusive

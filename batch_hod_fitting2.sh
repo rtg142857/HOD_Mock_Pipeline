@@ -4,8 +4,8 @@
 
 #SBATCH --ntasks 1 # The number of cores you need...
 #SBATCH -J paircounting #Give it something meaningful.
-#SBATCH -o logs/tracer_snap2
-#SBATCH -e logs/tracer_snap2_error
+#SBATCH -o logs/out_paircounting
+#SBATCH -e logs/err_paircounting
 #SBATCH -p cosma8 #or some other partition, e.g. cosma, cosma8, etc.
 #SBATCH -A dp004
 #SBATCH --exclusive
