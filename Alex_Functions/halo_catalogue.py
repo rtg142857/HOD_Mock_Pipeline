@@ -186,8 +186,14 @@ class FlamingoSnapshot(HaloCatalogue):
         # rvmax: looking for Radius of max circular velocity, relative to the L2 center
         if halo_type == "soap":
             is_not_subhalo = np.array(halo_cat["InputHalos"]["HBTplus"]["Depth"]) == 0
-            is_not_0mass = np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"]) != 0
-            relevant_field_halos = np.logical_and(is_not_0mass, is_not_subhalo)
+            rvmax_threshold = halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"].attrs["Mask Threshold"]
+            is_above_rvmax_threshold = np.array(halo_cat["SO"]["200_crit"]["NumberOfDarkMatterParticles"]) >= rvmax_threshold
+            is_nonzero_rvmax = np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"]) != 0
+            # for some reason, some of the halos above the particle threshold for calculating rvmax are still 0 rvmax
+
+            relevant_field_halos = np.logical_and(is_above_rvmax_threshold, is_not_subhalo)
+            relevant_field_halos = np.logical_and(relevant_field_halos, is_nonzero_rvmax)
+            
             self._quantities = {
                 'pos':   np.array(halo_cat["SO"]["200_crit"]["CentreOfMass"])[relevant_field_halos],
                 'vel':   np.array(halo_cat["SO"]["200_crit"]["CentreOfMassVelocity"])[relevant_field_halos],

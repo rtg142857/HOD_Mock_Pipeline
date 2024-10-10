@@ -2,6 +2,7 @@ import numpy as np
 import h5py
 import swiftsimio as sw
 import yaml
+import os
 
 def read_soap_log_mass(input_file, UnitMass_in_cgs):
     """
@@ -50,6 +51,26 @@ def find_field_particles_snapshot_file(input_file, group_id_default, particle_ra
     del DM_IDs
     return field_boolean
 
+def get_average_dm_particle_mass(path_config_filename):
+    """ 
+    Returns the average mass of a dark matter particle in a hdf5 file, in whatever mass is used internally
+    Args: path_config_filename
+    """
+    with open(path_config_filename, "r") as file:
+        path_config = yaml.safe_load(file)
+    snapshot_path = path_config["Paths"]["snapshot_path"]
+
+    if ".hdf5" in snapshot_path:
+        file_path = snapshot_path
+    else:
+        snapshot_files_list = os.listdir(snapshot_path)
+        snapshot_files_list = [file for file in snapshot_files_list if file.count(".") == 2]
+        file_path = snapshot_files_list[0]
+
+    f = h5py.File(file_path, "r")
+    mass_array = f["DMParticles"]["Masses"]
+    return np.mean(mass_array)
+
 def get_log_min_halo_mass(path_config_filename):
     with open(path_config_filename, "r") as file:
         path_config = yaml.safe_load(file)
@@ -64,9 +85,10 @@ def get_log_min_halo_mass(path_config_filename):
     
     if halo_type == "soap":
         halo_cat = h5py.File(soap_path, "r")
-        particle_mass = params["Snapshots"]["UnitMass_in_cgs"] / 1.98841e33
-        min_halo_mass = particle_mass * halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"].attrs["Mask Threshold"]
-        return np.log10(min_halo_mass)
+        unit_mass = params["Snapshots"]["UnitMass_in_cgs"] / 1.98841e33
+        particle_mass_Msol = get_average_dm_particle_mass(path_config_filename) * unit_mass
+        min_halo_mass_Msol = particle_mass_Msol * halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"].attrs["Mask Threshold"]
+        return np.log10(min_halo_mass_Msol)
     else:
         raise Exception("Add log min halo mass finder for Peregrinus boi")
 
