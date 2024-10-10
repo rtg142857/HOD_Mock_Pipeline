@@ -54,4 +54,6 @@ cd FastHodFitting/paircounting
 cp ../../../batch_hod_fitting2.sh ./
 mkdir logs
 jid2=$(sbatch  --dependency=afterany:$jid1 --parsable batch_hod_fitting2.sh $path_config)
-# then go to FastHodFitting/fitting_smoothed_curves_nersc and do batch_fitting.sh
+cd ../fitting_smoothed_curves_nersc
+mkdir logs
+jid3=$(sbatch  --dependency=afterany:$jid2 --parsable batch_fitting.sh $path_config)
