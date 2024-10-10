@@ -24,9 +24,12 @@ Params:
   mag_faint: -18 #20.0 for apparent, -18 for absolute are good ones
   mag_faint_type: "absolute" # Whether the faint magnitude limit is apparent or absolute; depends on whether mock is cut-sky or cubic-box
   #these probably don't need to be changed in most situations
-  log_mass_min: -11
   logMmin: 10.3 # Minimum mass of unresolved halo tracers for BGS or what have you
   logMmax: 11 # Maximum mass of unresolved halo tracers; SHOULD BE CHANGED FOR FLAMINGO
+  # limiting factor is lower limit mass of rvmax in soap HBT (100 particles)?
+  # should be equal to:
+  # used_parameters["Snapshots"]["UnitMass_in_cgs"] / 1.98841e33 * halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"].attrs["Mask Threshold"]
+  log_mass_min: # equal to logMmax
   ntracer: 3 # Number of satellite tracers for each halo
   particles: False # use particles to position galaxy tracers if True, NFW if False; True not yet supported with Flamingo
   mag_faint_extrapolate: -17 #If specified, the HOD parameters Mmin and M1 will be extrapolated linearly fainter than this magnitude. Default is -17

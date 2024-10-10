@@ -183,7 +183,7 @@ class FlamingoSnapshot(HaloCatalogue):
         # pos: looking for "center of mass position of largest L2 subhalo"
         # vel: looking for Center of mass vel of the largest L2 subhalo
         # mass: looking for number of particles in the halo * particle mass
-        # rvmax: looking for Radius of max circular velocity, relative to the L2 center, stored as the ratio to r100 (radius of 100% of the mass) condensed to [0,30000]
+        # rvmax: looking for Radius of max circular velocity, relative to the L2 center
         if halo_type == "soap":
             is_not_subhalo = np.array(halo_cat["InputHalos"]["HBTplus"]["Depth"]) == 0
             is_not_0mass = np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"]) != 0
@@ -192,8 +192,7 @@ class FlamingoSnapshot(HaloCatalogue):
                 'pos':   np.array(halo_cat["SO"]["200_crit"]["CentreOfMass"])[relevant_field_halos],
                 'vel':   np.array(halo_cat["SO"]["200_crit"]["CentreOfMassVelocity"])[relevant_field_halos],
                 'mass':  np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"])[relevant_field_halos] * UnitMass_in_Msol,
-                'rvmax': np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"])[relevant_field_halos] #/ np.array(halo_cat["SO"]["200_crit"]["SORadius"])[relevant_field_halos]
-                # TODO: Check if the rvmax should be unitless or Mpc/h
+                'rvmax': np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"])[relevant_field_halos]
             }
         elif halo_type == "peregrinus":
             is_not_subhalo = np.array(halo_cat["Subhalos"]["Rank"]) == 0
@@ -204,8 +203,7 @@ class FlamingoSnapshot(HaloCatalogue):
                 'pos':   np.array(halo_cat["Subhalos"]["ComovingAveragePosition"])[relevant_field_halos],
                 'vel':   np.array(halo_cat["Subhalos"]["PhysicalAverageVelocity"])[relevant_field_halos],
                 'mass':  np.array(halo_cat["Subhalos"]["BoundM200Crit"])[relevant_field_halos] * UnitMass_in_Msol,
-                'rvmax': np.array(halo_cat["Subhalos"]["RmaxComoving"])[relevant_field_halos] #/ np.array(halo_cat["Subhalos"]["REncloseComoving"])[relevant_field_halos]
-                # TODO: Check if the rvmax should be unitless or Mpc/h
+                'rvmax': np.array(halo_cat["Subhalos"]["RmaxComoving"])[relevant_field_halos]
             }
 
         self.size = len(self._quantities['mass'][...])

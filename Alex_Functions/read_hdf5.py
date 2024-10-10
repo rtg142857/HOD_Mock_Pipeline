@@ -1,6 +1,7 @@
 import numpy as np
 import h5py
 import swiftsimio as sw
+import yaml
 
 def read_soap_log_mass(input_file, UnitMass_in_cgs):
     """
@@ -48,6 +49,26 @@ def find_field_particles_snapshot_file(input_file, group_id_default, particle_ra
     del data
     del DM_IDs
     return field_boolean
+
+def get_log_min_halo_mass(path_config_filename):
+    with open(path_config_filename, "r") as file:
+        path_config = yaml.safe_load(file)
+    soap_path = path_config["Paths"]["soap_path"]
+    try:
+        halo_type = path_config["Misc"]["halo_type"]
+    except:
+        halo_type = "soap"
+    used_parameters_path = path_config["Paths"]["params_path"]
+    with open(used_parameters_path, "r") as file:
+        params = yaml.safe_load(file)
+    
+    if halo_type == "soap":
+        halo_cat = h5py.File(soap_path, "r")
+        particle_mass = params["Snapshots"]["UnitMass_in_cgs"] / 1.98841e33
+        min_halo_mass = particle_mass * halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"].attrs["Mask Threshold"]
+        return np.log10(min_halo_mass)
+    else:
+        raise Exception("Add log min halo mass finder for Peregrinus boi")
 
 #def count_field_particles_snapshot_directory(input_directory, group_id_default):
     """
