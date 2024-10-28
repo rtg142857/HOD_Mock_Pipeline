@@ -100,7 +100,7 @@ def get_log_min_halo_mass(path_config_filename):
         #     soap_files_list = os.listdir(soap_path)
         #     soap_files_list = [file for file in soap_files_list if "Catalogue" in file]
         #     halo_cat = h5py.File(soap_path + soap_files_list, "r")
-        print("Assuming 20 particles in smallest halos (double-check in hbt_params.txt)")
+        print("Assuming 20 particles in smallest halos (double-check in hbt_params.txt, \"MinNumPartOfSub\")")
         MinNumPartOfSub = 20
         return np.log10(particle_mass_Msol * MinNumPartOfSub)
 
