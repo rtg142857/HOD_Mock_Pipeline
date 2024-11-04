@@ -95,6 +95,8 @@ def get_mass_function(path_config_filename):
     # remove bins with zero haloes
     keep = n_halo > 0
     measured_mass_function = np.array([mass_binc[keep], n_halo[keep]])
+    print("Mass function from data:")
+    print(np.array2string(measured_mass_function, separator=","), flush=True)
 
     # create mass function object
     cosmology = CosmologyFlamingo(path_config_filename)
