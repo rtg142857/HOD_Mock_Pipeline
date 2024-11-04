@@ -57,7 +57,9 @@ class MassFunction(object):
         popt, pcov = curve_fit(self.__func, sigma, np.log10(mf), p0=[1,0.1,1.5,-0.5])
         
         self.update_params(popt)
-        print("Fit parameters", popt)
+        print("Mass function fit parameters", popt)
+        print("Using sigma: ", sigma)
+        print("With pcov", pcov)
         
         return popt
 
