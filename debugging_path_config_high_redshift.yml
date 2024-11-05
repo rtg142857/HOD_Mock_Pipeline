@@ -23,18 +23,19 @@ Params:
   mag_faint: 20.0
   mag_faint_type: "apparent" # Whether the faint magnitude limit is apparent or absolute; depends on whether mock is cut-sky or cubic-box
   #these probably don't need to be changed in most situations
-  log_mass_min: 11 #log(20 * 7.06 * 10^8) # Minimum mass of RESOLVED halo tracers; set equal to logMmax
-  logMmin: 10.3 # Minimum mass of unresolved halo tracers for BGS or what have you
-  logMmax: 11 # Maximum mass of UNresolved halo tracers; SHOULD BE CHANGED FOR FLAMINGO
   # limiting factor is lower limit mass of rvmax in soap HBT (100 particles)?
   # use read_hdf5.get_log_min_halo_mass
-  log_mass_min: logMmax # Minimum mass of RESOLVED halo tracers
+  log_mass_min: 11.0 #log(20 * 7.06 * 10^8) # Minimum mass of RESOLVED halo tracers; set equal to logMmax
+  logMmax: 11.0 # Maximum mass of UNresolved halo tracers; SHOULD BE CHANGED FOR FLAMINGO
+  logMmin: 10.3 # Minimum mass of unresolved halo tracers for BGS or what have you
   ntracer: 3 # Number of satellite tracers for each halo
   particles: False # use particles to position galaxy tracers if True, NFW if False; True not yet supported with Flamingo
   mag_faint_extrapolate: -17 #If specified, the HOD parameters Mmin and M1 will be extrapolated linearly fainter than this magnitude. Default is -17
 
 Misc:
   random_seed: 1
+  halo_type: peregrinus # soap, peregrinus, ...
+  particle_rate: 1 # how many field particles to look at for the unresolved tracers; 1 means all, 2 means every other, ...
 
 Labels:
   sim_label: "High_z_debugging" # just for labelling output files
