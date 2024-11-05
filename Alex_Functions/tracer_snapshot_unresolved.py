@@ -106,9 +106,9 @@ def get_mass_function(path_config_filename):
     # get fit to mass function
     mf.get_fit()
     
-    func = mf.mass_function(mass_bins, redshift)
-    print("Mass bins: ", mass_bins)
-    print("Calculated mass function for these bins: ",func, flush=True)
+    func = mf.number_density(mass_bins, redshift)
+    print("Mass bins: ", np.array2string(mass_bins, separator=","))
+    print("Calculated mass function for these bins: ", np.array2string(func, separator=","), flush=True)
 
     return mf
 
