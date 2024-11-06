@@ -29,15 +29,17 @@ def get_mass_function(path_config_filename):
     """
     with open(path_config_filename, "r") as file:
         path_config = yaml.safe_load(file)
+    with open(path_config["Paths"]["params_path"], "r") as file:
+        used_params = yaml.safe_load(file)
+
     soap_path = path_config["Paths"]["soap_path"]
     redshift = path_config["Params"]["redshift"]
-    L = path_config["Params"]["L"]
+    h = used_params["Cosmology"]["h"]
+    L = path_config["Params"]["L"] / h
     try:
         halo_type = path_config["Misc"]["halo_type"]
     except:
         halo_type = "soap"
-    with open(path_config["Paths"]["params_path"], "r") as file:
-        used_params = yaml.safe_load(file)
     UnitMass_in_cgs = float(used_params["InternalUnitSystem"]["UnitMass_in_cgs"])
 
     #path = "/global/cfs/cdirs/desi/cosmosim/Abacus/AbacusSummit_%s_c%03d_ph%03d/halos/"%(simulation, cosmo, ph)
@@ -52,9 +54,9 @@ def get_mass_function(path_config_filename):
 
         input_file = soap_path
         if halo_type == "peregrinus":
-            log_mass = read_hbt_log_mass(input_file, UnitMass_in_cgs)
+            log_mass = read_hbt_log_mass(input_file, UnitMass_in_cgs, h)
         else:
-            log_mass = read_soap_log_mass(input_file, UnitMass_in_cgs)
+            log_mass = read_soap_log_mass(input_file, UnitMass_in_cgs, h)
         
         print("Read log mass from file", flush=True)
 
@@ -72,9 +74,9 @@ def get_mass_function(path_config_filename):
             input_file = soap_path + file_name
 
             if halo_type == "peregrinus":
-                log_mass[file_number] = read_hbt_log_mass(input_file, UnitMass_in_cgs)
+                log_mass[file_number] = read_hbt_log_mass(input_file, UnitMass_in_cgs, h)
             else:
-                log_mass[file_number] = read_soap_log_mass(input_file, UnitMass_in_cgs)
+                log_mass[file_number] = read_soap_log_mass(input_file, UnitMass_in_cgs, h)
 
             #halo_cat = CompaSOHaloCatalog(input_file, cleaned=True, fields=['N'])
             #m_par = halo_cat.header["ParticleMassHMsun"]
@@ -133,15 +135,15 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
     """
     with open(path_config_filename, "r") as file:
         path_config = yaml.safe_load(file)
+    with open(path_config["Paths"]["params_path"], "r") as file:
+        run_params = yaml.safe_load(file)
     #redshift = path_config["Params"]["redshift"]
-    L = path_config["Params"]["L"]
+    h = run_params["Cosmology"]["h"]
+    L = path_config["Params"]["L"] / h
     logMmin = path_config["Params"]["logMmin"]
     logMmax = path_config["Params"]["logMmax"]
     particle_rate = path_config["Misc"]["particle_rate"]
 
-    param_file_path = path_config["Paths"]["params_path"]
-    with open(param_file_path, "r") as file:
-        run_params = yaml.safe_load(file)
     group_id_default = run_params["FOF"]["group_id_default"]
 
     # number of random haloes we need to get correct mass function
@@ -209,7 +211,7 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
         # get pos and vel of random particles
         #data = read_asdf(file_name, load_pos=True, load_vel=True)
         data = sw.load(snapshot_path)
-        pos = np.array(data.dark_matter.coordinates)[::particle_rate]
+        pos = np.array(data.dark_matter.coordinates)[::particle_rate] / h
         pos = pos[keep]
         vel = np.array(data.dark_matter.velocities)[::particle_rate]
         vel = vel[keep]
@@ -241,7 +243,7 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
                 # get pos and vel of random particles
                 #data = read_asdf(file_name, load_pos=True, load_vel=True)
                 data = sw.load(input_file)
-                pos = np.array(data.dark_matter.coordinates)[::particle_rate]
+                pos = np.array(data.dark_matter.coordinates)[::particle_rate] / h
                 pos = pos[keep]
                 vel = np.array(data.dark_matter.velocities)[::particle_rate]
                 vel = vel[keep]

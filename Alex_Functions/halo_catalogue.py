@@ -145,9 +145,12 @@ class FlamingoSnapshot(HaloCatalogue):
 
         with open(path_config_filename, "r") as file:
             path_config = yaml.safe_load(file)
+        with open(path_config["Paths"]["params_path"], "r") as file:
+            used_params = yaml.safe_load(file)
 
+        h = used_params["Cosmology"]["h"]
         L = path_config["Params"]["L"]
-        self.box_size = L
+        self.box_size = L / h
         snapshot_redshift = path_config["Params"]["redshift"]
         particles = path_config["Params"]["particles"]
 
@@ -156,10 +159,8 @@ class FlamingoSnapshot(HaloCatalogue):
         except:
             halo_type = "soap"
 
-        with open(path_config["Paths"]["params_path"], "r") as file:
-            used_params = yaml.safe_load(file)
         UnitMass_in_cgs = float(used_params["InternalUnitSystem"]["UnitMass_in_cgs"])
-        UnitMass_in_Msol = UnitMass_in_cgs / 1.98841e33
+        UnitMass_in_Msol_h = UnitMass_in_cgs / (1.98841e33 * h)
 
         # read SOAP halo catalogue file
 
@@ -179,7 +180,7 @@ class FlamingoSnapshot(HaloCatalogue):
         if particles:
             print("ERROR: Particles not yet supported with Flamingo halo catalogues")
 
-        # Using the 200_mean definition, in accordance with the above
+        # Using the 200_crit definition, in accordance with the above
         # pos: looking for "center of mass position of largest L2 subhalo"
         # vel: looking for Center of mass vel of the largest L2 subhalo
         # mass: looking for number of particles in the halo * particle mass
@@ -195,10 +196,10 @@ class FlamingoSnapshot(HaloCatalogue):
             relevant_field_halos = np.logical_and(relevant_field_halos, is_nonzero_rvmax)
             
             self._quantities = {
-                'pos':   np.array(halo_cat["SO"]["200_crit"]["CentreOfMass"])[relevant_field_halos],
+                'pos':   np.array(halo_cat["SO"]["200_crit"]["CentreOfMass"])[relevant_field_halos] / h,
                 'vel':   np.array(halo_cat["SO"]["200_crit"]["CentreOfMassVelocity"])[relevant_field_halos],
-                'mass':  np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"])[relevant_field_halos] * UnitMass_in_Msol,
-                'rvmax': np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"])[relevant_field_halos]
+                'mass':  np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"])[relevant_field_halos] * UnitMass_in_Msol_h,
+                'rvmax': np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"])[relevant_field_halos] / h
             }
         elif halo_type == "peregrinus":
             is_not_subhalo = np.array(halo_cat["Subhalos"]["Rank"]) == 0
@@ -206,10 +207,10 @@ class FlamingoSnapshot(HaloCatalogue):
             is_not_0mass = np.array(halo_cat["Subhalos"]["BoundM200Crit"]) != 0
             relevant_field_halos = np.logical_and(is_not_0mass, is_not_subhalo)
             self._quantities = {
-                'pos':   np.array(halo_cat["Subhalos"]["ComovingAveragePosition"])[relevant_field_halos],
+                'pos':   np.array(halo_cat["Subhalos"]["ComovingAveragePosition"])[relevant_field_halos] / h,
                 'vel':   np.array(halo_cat["Subhalos"]["PhysicalAverageVelocity"])[relevant_field_halos],
-                'mass':  np.array(halo_cat["Subhalos"]["BoundM200Crit"])[relevant_field_halos] * UnitMass_in_Msol,
-                'rvmax': np.array(halo_cat["Subhalos"]["RmaxComoving"])[relevant_field_halos]
+                'mass':  np.array(halo_cat["Subhalos"]["BoundM200Crit"])[relevant_field_halos] * UnitMass_in_Msol_h,
+                'rvmax': np.array(halo_cat["Subhalos"]["RmaxComoving"])[relevant_field_halos] / h
             }
 
         self.size = len(self._quantities['mass'][...])

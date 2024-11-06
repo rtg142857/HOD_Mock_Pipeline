@@ -4,12 +4,13 @@ import swiftsimio as sw
 import yaml
 import os
 
-def read_soap_log_mass(input_file, UnitMass_in_cgs):
+def read_soap_log_mass(input_file, UnitMass_in_cgs, h):
     """
-    Get an array representing the base-10 logarithm of the 200-crit dark matter field halo masses from a SOAP file, in units of log solar mass.
+    Get an array representing the base-10 logarithm of the 200-crit dark matter field halo masses from a SOAP file, in units of log solar mass/h.
     Args:
         input_file: Path to the SOAP file.
         UnitMass_in_cgs: The mass unit used in the SOAP calc (same as the snapshot units) in grams.
+        h: Reduced Hubble constant.
     """
     halo_cat = h5py.File(input_file, "r")
     is_not_subhalo = np.array(halo_cat["InputHalos"]["HBTplus"]["Depth"]) == 0
@@ -17,16 +18,17 @@ def read_soap_log_mass(input_file, UnitMass_in_cgs):
     is_not_0mass = np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"]) != 0
     relevant_field_halos = np.logical_and(is_not_0mass, is_not_subhalo)
 
-    UnitMass_in_Msol = UnitMass_in_cgs / 1.98841e33
-    log_mass = np.log10(np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"])[relevant_field_halos] * UnitMass_in_Msol)
+    UnitMass_in_Msol_h = UnitMass_in_cgs / (1.98841e33 * h)
+    log_mass = np.log10(np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"])[relevant_field_halos] * UnitMass_in_Msol_h)
     return log_mass
 
-def read_hbt_log_mass(input_file, UnitMass_in_cgs):
+def read_hbt_log_mass(input_file, UnitMass_in_cgs, h):
     """
-    Get an array representing the base-10 logarithm of the 200-crit dark matter field halo masses from an HBT file, in units of log solar mass.
+    Get an array representing the base-10 logarithm of the 200-crit dark matter field halo masses from an HBT file, in units of log solar mass/h.
     Args:
         input_file: Path to the HBT file.
         UnitMass_in_cgs: The mass unit used in the HBT calc (same as the snapshot units) in grams.
+        h: Reduced Hubble constant.
     """
     halo_cat = h5py.File(input_file, "r")
     is_not_subhalo = np.array(halo_cat["Subhalos"]["Rank"]) == 0
@@ -34,8 +36,8 @@ def read_hbt_log_mass(input_file, UnitMass_in_cgs):
     is_not_0mass = np.array(halo_cat["Subhalos"]["BoundM200Crit"]) != 0
     relevant_field_halos = np.logical_and(is_not_0mass, is_not_subhalo)
 
-    UnitMass_in_Msol = UnitMass_in_cgs / 1.98841e33
-    log_mass = np.log10(np.array(halo_cat["Subhalos"]["BoundM200Crit"])[relevant_field_halos] * UnitMass_in_Msol)
+    UnitMass_in_Msol_h = UnitMass_in_cgs / (1.98841e33 * h)
+    log_mass = np.log10(np.array(halo_cat["Subhalos"]["BoundM200Crit"])[relevant_field_halos] * UnitMass_in_Msol_h)
     return log_mass
 
 def find_field_particles_snapshot_file(input_file, group_id_default, particle_rate):
@@ -75,6 +77,9 @@ def get_average_dm_particle_mass(path_config_filename):
     return np.mean(mass_array)
 
 def get_log_min_halo_mass(path_config_filename):
+    """
+    Gets the minimum mass of the halos found by a group finder, in log Msol/h.
+    """
     with open(path_config_filename, "r") as file:
         path_config = yaml.safe_load(file)
     soap_path = path_config["Paths"]["soap_path"]
@@ -87,11 +92,11 @@ def get_log_min_halo_mass(path_config_filename):
         params = yaml.safe_load(file)
 
     unit_mass = params["Snapshots"]["UnitMass_in_cgs"] / 1.98841e33
-    particle_mass_Msol = get_average_dm_particle_mass(path_config_filename) * unit_mass
+    particle_mass_Msol_h = get_average_dm_particle_mass(path_config_filename) * unit_mass / params["Cosmology"]["h"]
     
     if halo_type == "soap":
         halo_cat = h5py.File(soap_path, "r")
-        min_halo_mass_Msol = particle_mass_Msol * halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"].attrs["Mask Threshold"]
+        min_halo_mass_Msol = particle_mass_Msol_h * halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"].attrs["Mask Threshold"]
         return np.log10(min_halo_mass_Msol)
     elif halo_type == "peregrinus":
         # if ".hdf5" in soap_path:
@@ -102,7 +107,7 @@ def get_log_min_halo_mass(path_config_filename):
         #     halo_cat = h5py.File(soap_path + soap_files_list, "r")
         print("Assuming 20 particles in smallest halos (double-check in hbt_params.txt, \"MinNumPartOfSub\")")
         MinNumPartOfSub = 20
-        return np.log10(particle_mass_Msol * MinNumPartOfSub)
+        return np.log10(particle_mass_Msol_h * MinNumPartOfSub)
 
 #def count_field_particles_snapshot_directory(input_directory, group_id_default):
     """
