@@ -42,7 +42,7 @@ def make_snapshot_tracers(input_file, output_file,
         used_params = yaml.safe_load(file)
     log_mass_min = path_config["Params"]["log_mass_min"]
     h = used_params["Cosmology"]["h"]
-    L = path_config["Params"]["L"] / h
+    L = path_config["Params"]["L"] * h
     ntracer = path_config["Params"]["ntracer"]
 
     cosmology = CosmologyFlamingo(path_config_filename=path_config_filename)

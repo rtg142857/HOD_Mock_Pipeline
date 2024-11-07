@@ -18,7 +18,7 @@ def read_soap_log_mass(input_file, UnitMass_in_cgs, h):
     is_not_0mass = np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"]) != 0
     relevant_field_halos = np.logical_and(is_not_0mass, is_not_subhalo)
 
-    UnitMass_in_Msol_h = UnitMass_in_cgs / (1.98841e33 * h)
+    UnitMass_in_Msol_h = UnitMass_in_cgs * h / 1.98841e33
     log_mass = np.log10(np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"])[relevant_field_halos] * UnitMass_in_Msol_h)
     return log_mass
 
@@ -36,7 +36,7 @@ def read_hbt_log_mass(input_file, UnitMass_in_cgs, h):
     is_not_0mass = np.array(halo_cat["Subhalos"]["BoundM200Crit"]) != 0
     relevant_field_halos = np.logical_and(is_not_0mass, is_not_subhalo)
 
-    UnitMass_in_Msol_h = UnitMass_in_cgs / (1.98841e33 * h)
+    UnitMass_in_Msol_h = UnitMass_in_cgs * h / 1.98841e33
     log_mass = np.log10(np.array(halo_cat["Subhalos"]["BoundM200Crit"])[relevant_field_halos] * UnitMass_in_Msol_h)
     return log_mass
 
@@ -92,7 +92,7 @@ def get_log_min_halo_mass(path_config_filename):
         params = yaml.safe_load(file)
 
     unit_mass = params["Snapshots"]["UnitMass_in_cgs"] / 1.98841e33
-    particle_mass_Msol_h = get_average_dm_particle_mass(path_config_filename) * unit_mass / params["Cosmology"]["h"]
+    particle_mass_Msol_h = get_average_dm_particle_mass(path_config_filename) * unit_mass * params["Cosmology"]["h"]
     
     if halo_type == "soap":
         halo_cat = h5py.File(soap_path, "r")

@@ -150,7 +150,7 @@ class FlamingoSnapshot(HaloCatalogue):
 
         h = used_params["Cosmology"]["h"]
         L = path_config["Params"]["L"]
-        self.box_size = L / h
+        self.box_size = L * h
         snapshot_redshift = path_config["Params"]["redshift"]
         particles = path_config["Params"]["particles"]
 
@@ -160,7 +160,7 @@ class FlamingoSnapshot(HaloCatalogue):
             halo_type = "soap"
 
         UnitMass_in_cgs = float(used_params["InternalUnitSystem"]["UnitMass_in_cgs"])
-        UnitMass_in_Msol_h = UnitMass_in_cgs / (1.98841e33 * h)
+        UnitMass_in_Msol_h = UnitMass_in_cgs * h / 1.98841e33
 
         # read SOAP halo catalogue file
 
@@ -196,10 +196,10 @@ class FlamingoSnapshot(HaloCatalogue):
             relevant_field_halos = np.logical_and(relevant_field_halos, is_nonzero_rvmax)
             
             self._quantities = {
-                'pos':   np.array(halo_cat["SO"]["200_crit"]["CentreOfMass"])[relevant_field_halos] / h,
+                'pos':   np.array(halo_cat["SO"]["200_crit"]["CentreOfMass"])[relevant_field_halos] * h,
                 'vel':   np.array(halo_cat["SO"]["200_crit"]["CentreOfMassVelocity"])[relevant_field_halos],
                 'mass':  np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"])[relevant_field_halos] * UnitMass_in_Msol_h,
-                'rvmax': np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"])[relevant_field_halos] / h
+                'rvmax': np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"])[relevant_field_halos] * h
             }
         elif halo_type == "peregrinus":
             is_not_subhalo = np.array(halo_cat["Subhalos"]["Rank"]) == 0
@@ -207,10 +207,10 @@ class FlamingoSnapshot(HaloCatalogue):
             is_not_0mass = np.array(halo_cat["Subhalos"]["BoundM200Crit"]) != 0
             relevant_field_halos = np.logical_and(is_not_0mass, is_not_subhalo)
             self._quantities = {
-                'pos':   np.array(halo_cat["Subhalos"]["ComovingAveragePosition"])[relevant_field_halos] / h,
+                'pos':   np.array(halo_cat["Subhalos"]["ComovingAveragePosition"])[relevant_field_halos] * h,
                 'vel':   np.array(halo_cat["Subhalos"]["PhysicalAverageVelocity"])[relevant_field_halos],
                 'mass':  np.array(halo_cat["Subhalos"]["BoundM200Crit"])[relevant_field_halos] * UnitMass_in_Msol_h,
-                'rvmax': np.array(halo_cat["Subhalos"]["RmaxComoving"])[relevant_field_halos] / h
+                'rvmax': np.array(halo_cat["Subhalos"]["RmaxComoving"])[relevant_field_halos] * h
             }
 
         self.size = len(self._quantities['mass'][...])

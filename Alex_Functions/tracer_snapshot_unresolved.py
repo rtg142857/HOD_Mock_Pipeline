@@ -35,7 +35,7 @@ def get_mass_function(path_config_filename):
     soap_path = path_config["Paths"]["soap_path"]
     redshift = path_config["Params"]["redshift"]
     h = used_params["Cosmology"]["h"]
-    L = path_config["Params"]["L"] / h
+    L = path_config["Params"]["L"] * h
     try:
         halo_type = path_config["Misc"]["halo_type"]
     except:
@@ -139,7 +139,7 @@ def make_snapshot_tracers_unresolved(output_file, mass_function, path_config_fil
         run_params = yaml.safe_load(file)
     #redshift = path_config["Params"]["redshift"]
     h = run_params["Cosmology"]["h"]
-    L = path_config["Params"]["L"] / h
+    L = path_config["Params"]["L"] * h
     logMmin = path_config["Params"]["logMmin"]
     logMmax = path_config["Params"]["logMmax"]
     particle_rate = path_config["Misc"]["particle_rate"]
