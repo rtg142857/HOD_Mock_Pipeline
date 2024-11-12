@@ -4,7 +4,10 @@ import swiftsimio as sw
 import yaml
 import os
 
-def read_soap_log_mass(input_file, UnitMass_in_cgs, h):
+import colossus
+colossus.cosmology.cosmology.setCosmology('planck18')
+
+def read_soap_log_mass(input_file, UnitMass_in_cgs, h, redshift, cosmology):
     """
     Get an array representing the base-10 logarithm of the 200-crit dark matter field halo masses from a SOAP file, in units of log solar mass/h.
     Args:
@@ -19,7 +22,14 @@ def read_soap_log_mass(input_file, UnitMass_in_cgs, h):
     relevant_field_halos = np.logical_and(is_not_0mass, is_not_subhalo)
 
     UnitMass_in_Msol_h = UnitMass_in_cgs * h / 1.98841e33
-    log_mass = np.log10(np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"])[relevant_field_halos] * UnitMass_in_Msol_h)
+    M200c = np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"])[relevant_field_halos] * UnitMass_in_Msol_h
+    rvmax = np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"])[relevant_field_halos] * h
+    rho = cosmology.critical_density(redshift)
+    r200c = (3./(800*np.pi) * M200c / rho)**(1./3) * (1.+redshift)
+    conc = 2.16 * r200c / rvmax
+    M200m, r200m, c200m = colossus.halo.mass_defs.changeMassDefinition(M200c, conc, redshift, "200c", "200m", profile="nfw")
+
+    log_mass = np.log10(M200m)
     return log_mass
 
 def read_hbt_log_mass(input_file, UnitMass_in_cgs, h):

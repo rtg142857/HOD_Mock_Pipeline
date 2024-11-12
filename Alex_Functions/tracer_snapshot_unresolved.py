@@ -32,6 +32,8 @@ def get_mass_function(path_config_filename):
     with open(path_config["Paths"]["params_path"], "r") as file:
         used_params = yaml.safe_load(file)
 
+    cosmology = CosmologyFlamingo(path_config_filename)
+
     soap_path = path_config["Paths"]["soap_path"]
     redshift = path_config["Params"]["redshift"]
     h = used_params["Cosmology"]["h"]
@@ -56,7 +58,7 @@ def get_mass_function(path_config_filename):
         if halo_type == "peregrinus":
             log_mass = read_hbt_log_mass(input_file, UnitMass_in_cgs, h)
         else:
-            log_mass = read_soap_log_mass(input_file, UnitMass_in_cgs, h)
+            log_mass = read_soap_log_mass(input_file, UnitMass_in_cgs, h, redshift, cosmology)
         
         print("Read log mass from file", flush=True)
 
@@ -101,7 +103,6 @@ def get_mass_function(path_config_filename):
     print(np.array2string(measured_mass_function, separator=","), flush=True)
 
     # create mass function object
-    cosmology = CosmologyFlamingo(path_config_filename)
     mf = MassFunction(cosmology=cosmology, redshift=redshift, 
                       measured_mass_function=measured_mass_function)
     

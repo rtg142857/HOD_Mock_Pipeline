@@ -8,6 +8,11 @@ from catalogue import Catalogue
 from cosmology import CosmologyFlamingo
 #from abacusnbody.data.compaso_halo_catalog import CompaSOHaloCatalog
 
+import colossus
+colossus.cosmology.cosmology.setCosmology('planck18')
+
+
+
 
 class HaloCatalogue(Catalogue):
     """
@@ -47,13 +52,13 @@ class HaloCatalogue(Catalogue):
         return self._quantities[prop]
 
 
-    def get_r200(self, comoving=True, rho_type="crit"):
+    def get_r200(self, comoving=True, rho_type="mean"):
         """
         Returns R200 of each halo
 
         Args:
             comoving: (optional) if True convert to comoving distance
-            rho_type: (optional) "mean" or "crit", default "crit"
+            rho_type: (optional) "mean" or "crit", default "mean"
         Returns:
             array of R200 [Mpc/h]
         """
@@ -195,11 +200,20 @@ class FlamingoSnapshot(HaloCatalogue):
             relevant_field_halos = np.logical_and(is_above_rvmax_threshold, is_not_subhalo)
             relevant_field_halos = np.logical_and(relevant_field_halos, is_nonzero_rvmax)
             
+            pos = np.array(halo_cat["SO"]["200_crit"]["CentreOfMass"])[relevant_field_halos] * h
+            vel = np.array(halo_cat["SO"]["200_crit"]["CentreOfMassVelocity"])[relevant_field_halos]
+            mass = np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"])[relevant_field_halos] * UnitMass_in_Msol_h
+            rvmax = np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"])[relevant_field_halos] * h
+
+            rho = self.cosmology.critical_density(self.get("zcos"))
+            r200c = (3./(800*np.pi) * mass / rho)**(1./3) * (1.+self.get("zcos"))
+            conc = 2.16 * r200c / rvmax
+            M200m, r200m, c200m = colossus.halo.mass_defs.changeMassDefinition(mass, conc, self.get("zcos"), "200c", "200m", profile="nfw")
             self._quantities = {
-                'pos':   np.array(halo_cat["SO"]["200_crit"]["CentreOfMass"])[relevant_field_halos] * h,
-                'vel':   np.array(halo_cat["SO"]["200_crit"]["CentreOfMassVelocity"])[relevant_field_halos],
-                'mass':  np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"])[relevant_field_halos] * UnitMass_in_Msol_h,
-                'rvmax': np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"])[relevant_field_halos] * h
+                'pos':   pos,
+                'vel':   vel,
+                'mass':  M200m,
+                'rvmax': rvmax
             }
         elif halo_type == "peregrinus":
             is_not_subhalo = np.array(halo_cat["Subhalos"]["Rank"]) == 0
