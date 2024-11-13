@@ -4,8 +4,9 @@ import swiftsimio as sw
 import yaml
 import os
 
-import colossus
-colossus.cosmology.cosmology.setCosmology('planck18')
+from colossus.cosmology import cosmology as colossusCosmology
+colossusCosmology.setCosmology('planck18')
+from colossus.halo import mass_defs
 
 def read_soap_log_mass(input_file, UnitMass_in_cgs, h, redshift, cosmology):
     """
@@ -27,7 +28,7 @@ def read_soap_log_mass(input_file, UnitMass_in_cgs, h, redshift, cosmology):
     rho = cosmology.critical_density(redshift)
     r200c = (3./(800*np.pi) * M200c / rho)**(1./3) * (1.+redshift)
     conc = 2.16 * r200c / rvmax
-    M200m, r200m, c200m = colossus.halo.mass_defs.changeMassDefinition(M200c, conc, redshift, "200c", "200m", profile="nfw")
+    M200m, r200m, c200m = mass_defs.changeMassDefinition(M200c, conc, redshift, "200c", "200m", profile="nfw")
 
     log_mass = np.log10(M200m)
     return log_mass

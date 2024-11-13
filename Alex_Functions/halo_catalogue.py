@@ -8,9 +8,9 @@ from catalogue import Catalogue
 from cosmology import CosmologyFlamingo
 #from abacusnbody.data.compaso_halo_catalog import CompaSOHaloCatalog
 
-import colossus
-colossus.cosmology.cosmology.setCosmology('planck18')
-
+from colossus.cosmology import cosmology as colossusCosmology
+colossusCosmology.setCosmology('planck18')
+from colossus.halo import mass_defs
 
 
 
@@ -208,7 +208,7 @@ class FlamingoSnapshot(HaloCatalogue):
             rho = self.cosmology.critical_density(self.get("zcos"))
             r200c = (3./(800*np.pi) * mass / rho)**(1./3) * (1.+self.get("zcos"))
             conc = 2.16 * r200c / rvmax
-            M200m, r200m, c200m = colossus.halo.mass_defs.changeMassDefinition(mass, conc, self.get("zcos"), "200c", "200m", profile="nfw")
+            M200m, r200m, c200m = mass_defs.changeMassDefinition(mass, conc, self.get("zcos"), "200c", "200m", profile="nfw")
             self._quantities = {
                 'pos':   pos,
                 'vel':   vel,
