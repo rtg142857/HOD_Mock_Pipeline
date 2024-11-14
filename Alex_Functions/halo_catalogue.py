@@ -205,10 +205,10 @@ class FlamingoSnapshot(HaloCatalogue):
             mass = np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"])[relevant_field_halos] * UnitMass_in_Msol_h
             rvmax = np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"])[relevant_field_halos] * h
 
-            rho = self.cosmology.critical_density(self.get("zcos"))
-            r200c = (3./(800*np.pi) * mass / rho)**(1./3) * (1.+self.get("zcos"))
+            rho = self.cosmology.critical_density(snapshot_redshift)
+            r200c = (3./(800*np.pi) * mass / rho)**(1./3) * (1.+snapshot_redshift)
             conc = 2.16 * r200c / rvmax
-            M200m, r200m, c200m = mass_defs.changeMassDefinition(mass, conc, self.get("zcos"), "200c", "200m", profile="nfw")
+            M200m, r200m, c200m = mass_defs.changeMassDefinition(mass, conc, snapshot_redshift, "200c", "200m", profile="nfw")
             self._quantities = {
                 'pos':   pos,
                 'vel':   vel,
