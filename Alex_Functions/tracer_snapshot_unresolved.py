@@ -38,6 +38,7 @@ def get_mass_function(path_config_filename):
     redshift = path_config["Params"]["redshift"]
     h = used_params["Cosmology"]["h"]
     L = path_config["Params"]["L"] * h
+    log_mass_min = path_config["Params"]["log_mass_min"]
     try:
         halo_type = path_config["Misc"]["halo_type"]
     except:
@@ -91,7 +92,7 @@ def get_mass_function(path_config_filename):
 
     # get number densities in mass bins  
     bin_size = 0.02
-    mass_bins = np.arange(10,16,bin_size)
+    mass_bins = np.arange(log_mass_min,16,bin_size)
     mass_binc = mass_bins[:-1]+bin_size/2.
     hist, bins = np.histogram(log_mass, bins=mass_bins)
     n_halo = hist/bin_size/L**3
