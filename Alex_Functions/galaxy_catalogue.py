@@ -122,9 +122,9 @@ class GalaxyCatalogue(Catalogue):
         u = np.random.rand(len(conc))
 
         interpolator = self.__nfw_interpolator()
-        points = np.array(list(zip(np.log10(conc), np.log10(u))))
+        points = np.array(list(zip(np.log10(conc*1.5), np.log10(u)))) # *1.5 is to allow points to go out to 1.5r200; fixes issues, apparently
         distance[is_sat] = 10**interpolator(points)
-        distance[is_sat] *= r200
+        distance[is_sat] *= r200 * 1.5 # making it so that the distances end up being the same
         return distance
 
     
