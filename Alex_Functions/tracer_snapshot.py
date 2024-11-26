@@ -181,8 +181,12 @@ if __name__ == "__main__":
     
     if soap_path[-5:] == ".hdf5": # if the soap path is a single file
         output_file = path+"galaxy_tracers_0.hdf5"
-        make_snapshot_tracers(soap_path, output_file,
+        if not os.path.isfile(output_file):
+            print("Making galaxy resolved tracers...")
+            make_snapshot_tracers(soap_path, output_file,
                               path_config_filename=path_config_filename)
+        else:
+            print("Galaxy resolved tracer file 0 found, skipping")
     else:
 
         # location of the snapshots
@@ -192,8 +196,13 @@ if __name__ == "__main__":
         # loop through the SOAP files, adding tracers, and saving the output to a file
         for file_number, file_name in enumerate(soap_files_list):
             output_file = path+"galaxy_tracers_"+str(file_number)+".hdf5"
+            print("Making galaxy resolved tracers...")
 
-            make_snapshot_tracers(soap_path+file_name, output_file,
+            if not os.path.isfile(output_file):
+                print("Making tracer file "+str(file_number))
+                make_snapshot_tracers(soap_path+file_name, output_file,
                                 path_config_filename=path_config_filename)
+            else:
+                print("Resolved tracer file "+str(file_number)+" found, skipping")
             
             # add_missing_particles(output_file%i, box_size=box_size)

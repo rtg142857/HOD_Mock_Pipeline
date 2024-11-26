@@ -114,6 +114,9 @@ def get_mass_function(path_config_filename):
     print("Mass bins: ", np.array2string(mass_bins, separator=","))
     print("Calculated mass function for these bins: ", np.array2string(func, separator=","), flush=True)
 
+    with open("tracer_output/mass_function.pickle", "wb") as handle:
+        pickle.dump(mf, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
     return mf
 
 
@@ -331,8 +334,14 @@ if __name__ == "__main__":
     
     # get halo mass function
     # Automatically loops over all files
-    print("Getting mass function for unresolved tracers")
-    mass_function = get_mass_function(path_config_filename)
+    if not os.path.isfile("tracer_output/mass_function.pickle"):
+        print("Getting mass function for unresolved tracers")
+        mass_function = get_mass_function(path_config_filename)
+    else:
+        print("Loading mass function from file")
+        with open("tracer_output/mass_function.pickle", "rb") as handle:
+            mass_function = pickle.load(handle)
+
 
     print("Unresolved tracer mass function obtained, making snapshot tracers now")
     # make file of central tracers, using particles, assigning random masses from mass function
