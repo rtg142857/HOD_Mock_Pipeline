@@ -267,8 +267,6 @@ class CosmologyFlamingo(Cosmology):
         path_config_filename: Path to the config file containing paths to other useful things
     """
     def __init__(self, path_config_filename):
-        # TODO: Get sigma8 and n_s from the initial condition parameter file (and find where it is)
-        #param_file_path = "/cosma8/data/dp004/flamingo/Runs/L" + str(L) + "N" + str(N) + "/" + simulation + "/used_parameters.yml"
 
         with open(path_config_filename, "r") as file:
             path_config = yaml.safe_load(file)

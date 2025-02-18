@@ -30,10 +30,6 @@ def make_snapshot_tracers(input_file, output_file,
         clean:       use cleaned Abacus halo catalogue? Default is True
         particles: use particles if True, NFW if False
     """
-    #path = "/global/cfs/cdirs/desi/cosmosim/Abacus/AbacusSummit_%s_c%03d_ph%03d/halos/"%(simulation, cosmo, ph)
-    #file_name = path+"z%.3f/halo_info/halo_info_%03d.asdf"%(redshift, file_number)
-    #simulation_path = "/cosma8/data/dp004/flamingo/Runs/L%03dN%03d/"%(L, N) + simulation
-    #file_name = "/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_soap.hdf5"
     print(input_file)
 
     with open(path_config_filename, "r") as file:
@@ -151,31 +147,6 @@ if __name__ == "__main__":
         halo_type = path_config["Misc"]["halo_type"]
     except:
         halo_type = "soap"
-
-    #photsys = path_config["photsys"]
-    #mag_faint = path_config["mag_faint"]
-    #redshift = path_config["redshift"]
-    #L = path_config["L"]
-    #N = path_config["N"]
-    #log_mass_min = path_config["log_mass_min"]
-    
-    # number of satellite tracers for each halo
-    #ntracer = 3
-
-    #sw_data = sw.load("/cosma8/data/dp004/flamingo/Runs/L%03dN%03d/"%(L, N) + simulation)
-    #sw_data = sw.load("/cosma7/data/dp004/dc-mene1/flamingo_copies/L1000N1800_snapshot_77.hdf5")
-    #print("WARNING: Using incorrect path for loading redshift")
-    #redshift=sw_data.metadata.redshift
-
-    #simulation = "base"
-    #cosmo = 0
-    #ph = 0
-    #box_size = 2000 #Mpc/h
-    #redshift = 0.2
-    #abacus_cosmologies_file = "abacus_cosmologies.csv"
-    
-    # for NFW profile
-    #particles=False
 
     path = "tracer_output/" #path to save the output files
     
