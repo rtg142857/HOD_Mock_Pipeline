@@ -24,7 +24,11 @@ def read_soap_log_mass(input_file, UnitMass_in_cgs, h, redshift, cosmology):
 
     UnitMass_in_Msol_h = UnitMass_in_cgs * h / 1.98841e33
     M200c = np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"])[relevant_field_halos] * UnitMass_in_Msol_h
-    rvmax = np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"])[relevant_field_halos] * h
+    try:
+        rvmax_uncut = halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"]
+    except:
+        rvmax_uncut = halo_cat["BoundSubhalo"]["MaximumCircularVelocityRadiusUnsoftened"]
+    rvmax = np.array(rvmax_uncut)[relevant_field_halos] * h
     rho = cosmology.critical_density(redshift)
     r200c = (3./(800*np.pi) * M200c / rho)**(1./3) * (1.+redshift)
     conc = 2.16 * r200c / rvmax
@@ -107,7 +111,12 @@ def get_log_min_halo_mass(path_config_filename):
     
     if halo_type == "soap":
         halo_cat = h5py.File(soap_path, "r")
-        min_halo_mass_Msol = particle_mass_Msol_h * halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"].attrs["Mask Threshold"]
+        try:
+            min_halo_mass_Msol = particle_mass_Msol_h * halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"].attrs["Mask Threshold"]
+        except:
+            print("Assuming 20 particles in smallest halos (double-check in HBT/Parameters.log, \"MinNumPartOfSub\")")
+            MinNumPartOfSub = 20
+            return np.log10(particle_mass_Msol_h * MinNumPartOfSub)
         return np.log10(min_halo_mass_Msol)
     elif halo_type == "peregrinus":
         # if ".hdf5" in soap_path:
