@@ -271,27 +271,33 @@ class CosmologyFlamingo(Cosmology):
         with open(path_config_filename, "r") as file:
             path_config = yaml.safe_load(file)
         param_file_path = path_config["Paths"]["params_path"]
-        ic_file_path = path_config["Paths"]["ics_path"]
 
         with open(param_file_path, "r") as file:
             run_params = yaml.safe_load(file)
         
-        config = configparser.ConfigParser()
-        config.read_file(open(ic_file_path))
+
 
         args = {"h": run_params["Cosmology"]["h"], "Omega_cdm": run_params["Cosmology"]["Omega_cdm"], "Omega_b": run_params["Cosmology"]["Omega_b"]}
 
         args["engine"] = "class"
 
         try:
-            args["n_s"] = float(config.get("cosmology", "n_s"))
-        except Exception:
-            pass
+            ic_file_path = path_config["Paths"]["ics_path"]
+            config = configparser.ConfigParser()
+            config.read_file(open(ic_file_path))
 
-        try:
-            args["A_s"] = float(config.get("cosmology", "A_s"))
+            try:
+                args["n_s"] = float(config.get("cosmology", "n_s"))
+            except Exception:
+                pass
+
+            try:
+                args["A_s"] = float(config.get("cosmology", "A_s"))
+            except Exception:
+                pass
+
         except Exception:
-            pass
+            args["A_s"] = path_config["Params"]["A_s"]
 
         try:
             args["w0_fld"] = run_params["Cosmology"]["w_0"]
